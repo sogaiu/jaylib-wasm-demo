@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 
   core_env = janet_core_env(NULL);
 
-  // make some jaylib functions available
+  // make jaylib functions available
   janet_cfuns(core_env, NULL, core_cfuns);
   janet_cfuns(core_env, NULL, shapes_cfuns);
   janet_cfuns(core_env, NULL, audio_cfuns);
