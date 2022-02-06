@@ -1,0 +1,37 @@
+0. ensure repository has been cloned recursively
+
+1. build janet once to produce amalgamated janet.c and patched janet.h
+
+   for *nixen, that's:
+
+     cd janet
+     make
+     cd ..
+
+2. build wasm version of libraylib.a
+
+   for *nixen, that's something like:
+
+     source ~/src/emsdk/emsdk_env.sh      # tested with emscripten 3.1.3
+     cd jaylib/raylib/src
+     make PLATFORM=PLATFORM_WEB -B
+     # if the line above fails, try:
+     make PLATFORM=PLATFORM_WEB -B -e
+     cd ../../..
+
+3. build wasm bits (public directory will get populated)
+
+   for *nixen, that's:
+
+     sh build-wasm.sh
+
+4. start a web server to serve the built files:
+
+   for a machine with python3, that might be:
+
+     python3 -m http.server --drirectory public
+
+5. try out the results:
+
+   visit http://localhost:8000 and click on main.html
+
