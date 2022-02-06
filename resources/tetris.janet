@@ -766,11 +766,6 @@
 # happen
 (init-window screen-width screen-height `Tetris`)
 
-# XXX: on web, init-audio-device leads to:
-#      with -s ASSERTIONS=2:
-#        main.js:1 Aborted(No EM_ASM constant found at address 244287)
-#      without:
-#        Uncaught TypeError: Cannot read properties of undefined (reading 'apply')
 (init-audio-device)
 (set bgm (load-music-stream "resources/theme.ogg"))
 (play-music-stream bgm)
