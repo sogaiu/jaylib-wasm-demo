@@ -43,8 +43,8 @@ int main(int argc, char** argv) {
 
   int ret =
     janet_dostring(core_env,
-                   "(import ./resources/tetris :prefix \"\")",
-                   "tetris.janet", &result);
+                   "(import ./resources/game :prefix \"\")",
+                   "game.janet", &result);
 
 #if defined(PLATFORM_WEB)
   // XXX: chrome dev console suggests using framerate of 0

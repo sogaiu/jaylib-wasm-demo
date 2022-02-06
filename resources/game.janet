@@ -764,7 +764,7 @@
 
 # now that a loop is not being done in janet, this needs to
 # happen
-(init-window screen-width screen-height `Tetris`)
+(init-window screen-width screen-height `Jaylib Wasm Demo`)
 
 (init-audio-device)
 (set bgm (load-music-stream "resources/theme.ogg"))
@@ -778,7 +778,7 @@
   [& args]
   #
   (set-config-flags :msaa-4x-hint)
-  (init-window screen-width screen-height `Tetris`)
+  (init-window screen-width screen-height `Jaylib Wasm Demo`)
   (set-target-fps 60)
   #
   (set-exit-key 0)

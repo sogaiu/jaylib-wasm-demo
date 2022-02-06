@@ -40,7 +40,7 @@
 
 # now that a loop is not being done in janet, this needs to
 # happen
-(init-window screen-width screen-height `Tetris`)
+(init-window screen-width screen-height `Jaylib Wasm Demo`)
 (init-game)
 
 # XXX: original code
@@ -48,7 +48,7 @@
   [& args]
   #
   (set-config-flags :msaa-4x-hint)
-  (init-window screen-width screen-height `Tetris`)
+  (init-window screen-width screen-height `Jaylib Wasm Demo`)
   (set-target-fps 60)
   #
   (set-exit-key 0)
