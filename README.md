@@ -19,6 +19,7 @@ The goal of this demo is to produce appropriate `.wasm`, `.js`, `.html`, and rel
 
 * Emscripten 3.1.3 (other versions might work)
 * Usual build tools
+* Janet
 
 ## Steps
 
@@ -27,61 +28,16 @@ The goal of this demo is to produce appropriate `.wasm`, `.js`, `.html`, and rel
     git clone --recursive https://github.com/sogaiu/jaylib-wasm-demo
     ```
 
-* Build janet once to produce [an amalgamated `janet.c`](https://janet-lang.org/capi/embedding.html) and `janet.h`-related:
-
-    For *nixen, that's:
-    ```
-    cd janet
-    make
-    cd ..
-    ```
-
-    For Windows (likely need an appropriate Developer prompt):
-    ```
-    cd janet
-    build_win.bat
-    cd ..
-    ```
-
-* Build [HTML5-ready `libraylib.a`](https://github.com/raysan5/raylib/wiki/Working-for-Web-(HTML5)#2-compile-raylib-library):
-
-    For *nixen, with emsdk under `~/src/emsdk`, that's something like:
+* For *nixen, with emsdk under `~/src/emsdk`:
     ```
     source ~/src/emsdk/emsdk_env.sh
-    cd jaylib/raylib/src
-    make PLATFORM=PLATFORM_WEB -B
-    # if the line above fails, try:
-    make PLATFORM=PLATFORM_WEB -B -e
-    cd ../../..
+    janet build-unix.janet
     ```
 
-    For Windows, with emsdk in a sibling directory of this repository:
+* For Windows, with emsdk in a sibling directory of this repository (likely need to do via a Native Tools Command Prompt):
     ```
     ..\emsdk\emsdk_env.bat
-    cd jaylib\raylib\src
-    emcc -c rcore.c -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
-    emcc -c rshapes.c -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
-    emcc -c rtextures.c -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
-    emcc -c rtext.c -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
-    emcc -c rmodels.c -Os -Wall -DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2
-    emcc -c utils.c -Os -Wall -DPLATFORM_WEB
-    emcc -c raudio.c -Os -Wall -DPLATFORM_WEB
-    emar rcs libraylib.a rcore.o rshapes.o rtextures.o rtext.o rmodels.o utils.o raudio.o
-    cd ..\..\..
-    ```
-
-    Note that on Windows, `emcc` and `emar` are `.bat` files, so if putting some of the lines above in a `.bat` file for convenient execution, using `call` in front of each line using `emcc` or `emar` may be necessary.
-
-* Build wasm bits using [emcc](https://emscripten.org/docs/tools_reference/emcc.html) (a directory named `public` will be created if necessary and populated):
-
-    For *nixen, that's:
-    ```
-    sh build-wasm.sh
-    ```
-
-    For Windows:
-    ```
-    build-wasm.bat
+    janet build-windows.janet
     ```
 
 * Start a web server to serve the built files:
