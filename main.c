@@ -31,46 +31,16 @@ int main(int argc, char** argv) {
 
   core_env = janet_core_env(NULL);
 
-  Janet result;
-
-  const JanetRegExt regs[] = {
-    // XXX: JANET_REG didn't work but JANET_REG_ does...why?
-    JANET_REG_("set-config-flags", cfun_SetConfigFlags),
-    JANET_REG_("set-target-fps", cfun_SetTargetFPS),
-    JANET_REG_("set-exit-key", cfun_SetExitKey),
-    JANET_REG_("init-window", cfun_InitWindow),
-    JANET_REG_("close-window", cfun_CloseWindow),
-    JANET_REG_("window-should-close", cfun_WindowShouldClose),
-    JANET_REG_("get-screen-height", cfun_GetScreenHeight),
-    JANET_REG_("get-screen-width", cfun_GetScreenWidth),
-    //
-    JANET_REG_("begin-drawing", cfun_BeginDrawing),
-    JANET_REG_("end-drawing", cfun_EndDrawing),
-    JANET_REG_("clear-background", cfun_ClearBackground),
-    //
-    JANET_REG_("key-down?", cfun_IsKeyDown),
-    JANET_REG_("key-pressed?", cfun_IsKeyPressed),
-    //
-    JANET_REG_("draw-line", cfun_DrawLine),
-    JANET_REG_("draw-rectangle", cfun_DrawRectangle),
-    //
-    JANET_REG_("draw-text", cfun_DrawText),
-    JANET_REG_("measure-text", cfun_MeasureText),
-    //
-    JANET_REG_("init-audio-device", cfun_InitAudioDevice),
-    JANET_REG_("close-audio-device", cfun_CloseAudioDevice),
-    JANET_REG_("set-music-volume", cfun_SetMusicVolume),
-    JANET_REG_("load-music-stream", cfun_LoadMusicStream),
-    JANET_REG_("play-music-stream", cfun_PlayMusicStream),
-    JANET_REG_("update-music-stream", cfun_UpdateMusicStream),
-    JANET_REG_("pause-music-stream", cfun_PauseMusicStream),
-    JANET_REG_("stop-music-stream", cfun_StopMusicStream),
-    JANET_REG_("resume-music-stream", cfun_ResumeMusicStream),
-    JANET_REG_END
-  };
-
   // make some jaylib functions available
-  janet_cfuns_ext(core_env, NULL, regs);
+  janet_cfuns(core_env, NULL, core_cfuns);
+  janet_cfuns(core_env, NULL, shapes_cfuns);
+  janet_cfuns(core_env, NULL, audio_cfuns);
+  janet_cfuns(core_env, NULL, gesture_cfuns);
+  janet_cfuns(core_env, NULL, text_cfuns);
+  janet_cfuns(core_env, NULL, image_cfuns);
+  janet_cfuns(core_env, NULL, threed_cfuns);
+
+  Janet result;
 
   int ret =
     janet_dostring(core_env,
