@@ -17,8 +17,7 @@
 
 static JanetTable* core_env = NULL;
 
-void UpdateDrawFrame(void)
-{
+void UpdateDrawFrame(void) {
   Janet result;
 
   //int ret =
