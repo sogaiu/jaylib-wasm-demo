@@ -23,7 +23,7 @@ A demo of using jaylib in a web browser
     cd ..
     ```
 
-    For Windows:
+    For Windows (likely need an appropriate Developer prompt):
     ```
     cd janet
     build_win.bat
