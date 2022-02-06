@@ -29,9 +29,19 @@
 
    for a machine with python3, that might be:
 
-     python3 -m http.server --drirectory public
+     python3 -m http.server --directory public
 
 5. try out the results:
 
    visit http://localhost:8000 and click on main.html
+
+---
+
+thanks
+
+* bakpakin
+* MikeBeller
+* pyrmont
+* saikyun
+* yumaikas
 
