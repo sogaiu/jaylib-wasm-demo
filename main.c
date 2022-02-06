@@ -72,32 +72,10 @@ int main(int argc, char** argv) {
   // make some jaylib functions available
   janet_cfuns_ext(core_env, NULL, regs);
 
-  // read in source for game
-  FILE* code_file = fopen("resources/tetris.janet", "rb");
-  //FILE* code_file = fopen("resources/rectangle.janet", "rb");
-  if (NULL == code_file) {
-    fprintf(stderr, "Could not open tetris.janet\n");
-    exit(1);
-  }
-  fseek(code_file, 0, SEEK_END);
-  size_t code_size = ftell(code_file);
-  fseek(code_file, 0, SEEK_SET);
-  unsigned char *code_buffer = janet_malloc(code_size);
-  if (NULL == code_buffer) {
-    fprintf(stderr, "Failed to allocate code buffer\n");
-    exit(1);
-  }
-  if (!fread(code_buffer, 1, code_size, code_file)) {
-    fprintf(stderr, "Failed to read into code buffer\n");
-    exit(1);
-  }
-  fclose(code_file);
-
-  // run source that was read in
   int ret =
-    janet_dobytes(core_env, code_buffer, (int32_t) code_size, "source",
-                  &result);
-  janet_free(code_buffer);
+    janet_dostring(core_env,
+                   "(import ./resources/tetris :prefix \"\")",
+                   "tetris.janet", &result);
 
 #if defined(PLATFORM_WEB)
   // XXX: chrome dev console suggests using framerate of 0
@@ -105,7 +83,7 @@ int main(int argc, char** argv) {
   emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
 #else
   int ret2 =
-    janet_dostring(core_env, "(desktop)", "source", &result);  
+    janet_dostring(core_env, "(desktop)", "source", &result);
   while (!WindowShouldClose())
   {
     UpdateDrawFrame();
