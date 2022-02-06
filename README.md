@@ -1,6 +1,19 @@
 # jaylib-wasm-demo
 
-A demo of using jaylib in a web browser
+A demo of using [jaylib](https://github.com/janet-lang/jaylib) in a web browser
+
+## Overview
+
+The current approach is to build a small program that embeds [janet](https://janet-lang.org) and is linked to [Raylib](https://www.raylib.com/).  The program loads and executes an example game written in Janet that uses Raylib via jaylib.
+
+The program is made executable in a web browser by being compiled by [Emscripten](https://emscripten.org/).
+
+The goal of this demo is to produce appropriate `.wasm`, `.js`, `.html`, and related files and then to test their functionality via a web browser.  Before compilation via Emscripten can take place, some pieces need to be prepared:
+
+* `main.c` - the aforementioned small program
+* `janet.c` + support files - for embedding janet
+* `libraylib.a` - "HTML5-ready" Raylib static library
+* `game.janet` - a small game written in Janet / jaylib
 
 ## Prerequisites
 
@@ -9,12 +22,12 @@ A demo of using jaylib in a web browser
 
 ## Steps
 
-0. Ensure repository has been cloned recursively:
+* Ensure repository has been cloned recursively:
     ```
     git clone --recursive https://github.com/sogaiu/jaylib-wasm-demo
     ```
 
-1. Build janet once to produce amalgamated `janet.c` and `janet.h`-related:
+* Build janet once to produce [an amalgamated `janet.c`](https://janet-lang.org/capi/embedding.html) and `janet.h`-related:
 
     For *nixen, that's:
     ```
@@ -30,7 +43,7 @@ A demo of using jaylib in a web browser
     cd ..
     ```
 
-2. Build [wasm version of `libraylib.a`](https://github.com/raysan5/raylib/wiki/Working-for-Web-(HTML5)#2-compile-raylib-library):
+* Build [HTML5-ready `libraylib.a`](https://github.com/raysan5/raylib/wiki/Working-for-Web-(HTML5)#2-compile-raylib-library):
 
     For *nixen, with emsdk under `~/src/emsdk`, that's something like:
     ```
@@ -57,9 +70,9 @@ A demo of using jaylib in a web browser
     cd ..\..\..
     ```
 
-    Note that on Windows, `emcc` and `emar` are `.bat` files, so if putting some of the lines above in a `.bat` file is desirable, using `call` in front of each line using `emcc` or `emar` may be necessary for things to work.
+    Note that on Windows, `emcc` and `emar` are `.bat` files, so if putting some of the lines above in a `.bat` file for convenient execution, using `call` in front of each line using `emcc` or `emar` may be necessary.
 
-3. Build wasm bits (`public` directory will get populated):
+* Build wasm bits using [emcc](https://emscripten.org/docs/tools_reference/emcc.html) (a directory named `public` will be created if necessary and populated):
 
     For *nixen, that's:
     ```
@@ -71,14 +84,14 @@ A demo of using jaylib in a web browser
     build-wasm.bat
     ```
 
-4. Start a web server to serve the built files:
+* Start a web server to serve the built files:
 
     For a machine with python3, that might be:
     ```
     python3 -m http.server --directory public
     ```
 
-5. Try out the results:
+* Try out the results:
 
     Visit http://localhost:8000 and click on `main.html`
 
@@ -89,6 +102,7 @@ A demo of using jaylib in a web browser
 * bakpakin
 * MikeBeller
 * pyrmont
+* raysan5
 * saikyun
 * yumaikas
 * ZakharValaha
