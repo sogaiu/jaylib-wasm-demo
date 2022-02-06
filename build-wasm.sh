@@ -26,7 +26,7 @@ emcc \
     janet/build/c/janet.c jaylib/raylib/src/libraylib.a \
     -Ijanet/build \
     -Ijaylib/src \
-    -Ijaylib/raylib/src/ \
+    -Ijaylib/raylib/src \
     --preload-file resources \
     --source-map-base http://localhost:8000/ \
     -s ASSERTIONS=2 \
