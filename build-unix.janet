@@ -19,52 +19,54 @@
     (eprintf "<<problem with mkdir for: %p>>" out-dir)
     (os/exit 1)))
 
-(printf "\n[preparing amalgamated janet.c and related]...")
-(let [old-dir (os/cwd)]
-  (try
-    (os/cd "janet")
-    ([e]
-      (eprintf "<<failed to cd to janet directory>>")
-      (os/exit 1)))
-  (try
-    (os/execute ["make" "clean"] :px)
-    ([e]
-      (eprintf "<<problem with make clean for janet>>")
-      (os/exit 1)))
-  (try
-    (os/execute ["make"] :px)
-    ([e]
-      (eprintf "<<problem making janet>>")
-      (os/exit 1)))
-  (try
-    (os/cd old-dir)
-    ([e]
-      (eprintf "<<problem restoring current directory>>")
-      (os/exit 1))))
-
-(printf "\n[preparing HTML5-aware libraylib.a]...")
-(let [old-dir (os/cwd)]
-  (try
-    (os/cd "jaylib/raylib/src")
-    ([e]
-      (eprintf "<<failed to cd to janet directory>>")
-      (os/exit 1)))
-  (try
-    (os/execute ["make" "clean"] :px)
-    ([e]
-      (eprintf "<<problem with make clean for raylib>>")
-      (os/exit 1)))
-  (try
-    (os/execute ["make"
-                 "PLATFORM=PLATFORM_WEB" "-B" "-e"] :px)
-    ([e]
-      (eprintf "<<problem building libjaylib.a>>")
-      (os/exit 1)))
-  (try
-    (os/cd old-dir)
-    ([e]
-      (eprintf "<<problem restoring current directory>>")
-      (os/exit 1))))
+(unless (os/getenv "JAYLIB_WASM_DEMO_SKIP_DEPS")
+  #
+  (printf "\n[preparing amalgamated janet.c and related]...")
+  (let [old-dir (os/cwd)]
+    (try
+      (os/cd "janet")
+      ([e]
+        (eprintf "<<failed to cd to janet directory>>")
+        (os/exit 1)))
+    (try
+      (os/execute ["make" "clean"] :px)
+      ([e]
+        (eprintf "<<problem with make clean for janet>>")
+        (os/exit 1)))
+    (try
+      (os/execute ["make"] :px)
+      ([e]
+        (eprintf "<<problem making janet>>")
+        (os/exit 1)))
+    (try
+      (os/cd old-dir)
+      ([e]
+        (eprintf "<<problem restoring current directory>>")
+        (os/exit 1))))
+  #
+  (printf "\n[preparing HTML5-aware libraylib.a]...")
+  (let [old-dir (os/cwd)]
+    (try
+      (os/cd "jaylib/raylib/src")
+      ([e]
+        (eprintf "<<failed to cd to janet directory>>")
+        (os/exit 1)))
+    (try
+      (os/execute ["make" "clean"] :px)
+      ([e]
+        (eprintf "<<problem with make clean for raylib>>")
+        (os/exit 1)))
+    (try
+      (os/execute ["make"
+                   "PLATFORM=PLATFORM_WEB" "-B" "-e"] :px)
+      ([e]
+        (eprintf "<<problem building libjaylib.a>>")
+        (os/exit 1)))
+    (try
+      (os/cd old-dir)
+      ([e]
+        (eprintf "<<problem restoring current directory>>")
+        (os/exit 1)))))
 
 (printf "\n[compiling with emcc]...")
 (try
