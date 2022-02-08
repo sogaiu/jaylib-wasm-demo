@@ -17,12 +17,18 @@
 
 static JanetTable* core_env = NULL;
 
-void UpdateDrawFrame(void) {
-  Janet result;
+static JanetFiber* game_fiber = NULL;
 
-  //int ret =
-  janet_dostring(core_env, "(update-draw-frame)",
-                 "source", &result);
+void UpdateDrawFrame(void) {
+  Janet ret;
+  JanetSignal status = janet_continue(game_fiber, janet_wrap_nil(), &ret);
+  if (status == JANET_SIGNAL_ERROR) {
+    janet_stacktrace(game_fiber, ret);
+    janet_deinit();
+    game_fiber = NULL;
+    // XXX
+    abort();
+  }
 }
 
 int main(int argc, char** argv) {
@@ -39,20 +45,31 @@ int main(int argc, char** argv) {
   janet_cfuns(core_env, NULL, image_cfuns);
   janet_cfuns(core_env, NULL, threed_cfuns);
 
-  Janet result;
+  Janet ret;
 
-  int ret =
+  int status =
     janet_dostring(core_env,
-                   "(import ./resources/game :prefix \"\")",
-                   "game.janet", &result);
+                   "(import ./resources/game :prefix \"\")\n"
+                   "main-fiber",
+                   "game.janet", &ret);
+
+  if (status == JANET_SIGNAL_ERROR) {
+    printf("start up error.\n");
+    janet_deinit();
+    game_fiber = NULL;
+    return -1;
+  }
+
+  janet_gcroot(ret);
+  game_fiber = janet_unwrap_fiber(ret);
 
 #if defined(PLATFORM_WEB)
   // XXX: chrome dev console suggests using framerate of 0
   //emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
   emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
 #else
-  int ret2 =
-    janet_dostring(core_env, "(desktop)", "source", &result);
+  status =
+    janet_dostring(core_env, "(desktop)", "source", &ret);
   while (!WindowShouldClose())
   {
     UpdateDrawFrame();
@@ -61,5 +78,5 @@ int main(int argc, char** argv) {
 
   janet_deinit();
 
-  return ret;
+  return 0;
 }

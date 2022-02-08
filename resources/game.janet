@@ -773,6 +773,16 @@
 
 (init-game)
 
+(def main-fiber
+  (fiber/new
+    (fn []
+      (while (not (window-should-close))
+        (update-draw-frame)
+        (yield))
+      #
+      (close-window))
+    :i))
+
 # XXX: original code
 '(defn main
   [& args]
@@ -793,4 +803,3 @@
     (update-draw-frame))
   #
   (close-window))
-
