@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
                    "game.janet", &ret);
 
   if (status == JANET_SIGNAL_ERROR) {
-    printf("start up error.\n");
+    printf("error loading game\n");
     janet_deinit();
     game_fiber = NULL;
     return -1;
@@ -68,8 +68,17 @@ int main(int argc, char** argv) {
   //emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
   emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
 #else
+  // XXX: don't use `setdyn` in `desktop`
   status =
     janet_dostring(core_env, "(desktop)", "source", &ret);
+
+  if (status == JANET_SIGNAL_ERROR) {
+    printf("error during desktop-specific init\n");
+    janet_deinit();
+    game_fiber = NULL;
+    return -1;
+  }
+
   while (!WindowShouldClose())
   {
     UpdateDrawFrame();

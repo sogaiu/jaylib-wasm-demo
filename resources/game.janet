@@ -757,6 +757,7 @@
   (update-game)
   (draw-game))
 
+# XXX: don't use `setdyn` in here
 (defn desktop
   []
   (set-config-flags :msaa-4x-hint)
