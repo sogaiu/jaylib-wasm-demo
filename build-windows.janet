@@ -53,24 +53,24 @@
         (os/exit 1)))
     (def commands
       [["emcc.bat"
-        "-c" "rcore.c" "-Os" "-Wall"
+        "-c" "rcore.c" "-Os" "-Wall" "-gsource-map"
         "-DPLATFORM_WEB" "-DGRAPHICS_API_OPENGL_ES2"]
        ["emcc.bat"
-        "-c" "rshapes.c" "-Os" "-Wall"
+        "-c" "rshapes.c" "-Os" "-Wall" "-gsource-map"
         "-DPLATFORM_WEB" "-DGRAPHICS_API_OPENGL_ES2"]
        ["emcc.bat"
-        "-c" "rtextures.c" "-Os" "-Wall"
+        "-c" "rtextures.c" "-Os" "-Wall" "-gsource-map"
         "-DPLATFORM_WEB" "-DGRAPHICS_API_OPENGL_ES2"]
        ["emcc.bat"
-        "-c" "rtext.c" "-Os" "-Wall"
+        "-c" "rtext.c" "-Os" "-Wall" "-gsource-map"
         "-DPLATFORM_WEB" "-DGRAPHICS_API_OPENGL_ES2"]
        ["emcc.bat"
-        "-c" "rmodels.c" "-Os" "-Wall"
+        "-c" "rmodels.c" "-Os" "-Wall" "-gsource-map"
         "-DPLATFORM_WEB" "-DGRAPHICS_API_OPENGL_ES2"]
        ["emcc.bat"
-        "-c" "utils.c" "-Os" "-Wall" "-DPLATFORM_WEB"]
+        "-c" "utils.c" "-Os" "-Wall" "-gsource-map" "-DPLATFORM_WEB"]
        ["emcc.bat"
-        "-c" "raudio.c" "-Os" "-Wall" "-DPLATFORM_WEB"]
+        "-c" "raudio.c" "-Os" "-Wall" "-gsource-map" "-DPLATFORM_WEB"]
        ["emar.bat"
         "rcs" "libraylib.a"
         "rcore.o" "rshapes.o" "rtextures.o" "rtext.o" "rmodels.o"
@@ -91,6 +91,7 @@
 (try
   (os/execute ["emcc.bat"
                "-Os" "-Wall"
+               "-gsource-map"
                "-DPLATFORM_WEB"
                "-o" (string out-dir "/main.html")
                "main.c"
@@ -103,6 +104,7 @@
                "-Ijaylib/raylib/src"
                "--preload-file" preload-dir
                "--source-map-base" (string "http://localhost:" port "/")
+               "--shell-file" "jaylib/raylib/src/shell.html"
                "-s" "ASYNCIFY"
                "-s" "ASSERTIONS=2"
                "-s" "ALLOW_MEMORY_GROWTH=1"

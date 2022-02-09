@@ -58,6 +58,7 @@
         (os/exit 1)))
     (try
       (os/execute ["make"
+                   "CFLAGS=-gsource-map"
                    "PLATFORM=PLATFORM_WEB" "-B" "-e"] :px)
       ([e]
         (eprintf "<<problem building libjaylib.a>>")
@@ -72,6 +73,7 @@
 (try
   (os/execute ["emcc"
                "-Os" "-Wall"
+               "-gsource-map"
                "-DPLATFORM_WEB"
                "-o" (string out-dir "/main.html")
                "main.c"
@@ -82,6 +84,7 @@
                "-Ijaylib/raylib/src"
                "--preload-file" preload-dir
                "--source-map-base" (string "http://localhost:" port "/")
+               "--shell-file" "jaylib/raylib/src/shell.html"
                "-s" "ASSERTIONS=2"
                "-s" "ALLOW_MEMORY_GROWTH=1"
                "-s" "FORCE_FILESYSTEM=1"
