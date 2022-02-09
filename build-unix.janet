@@ -49,7 +49,7 @@
     (try
       (os/cd "jaylib/raylib/src")
       ([e]
-        (eprintf "<<failed to cd to janet directory>>")
+        (eprintf "<<failed to cd to jaylib directory>>")
         (os/exit 1)))
     (try
       (os/execute ["make" "clean"] :px)
