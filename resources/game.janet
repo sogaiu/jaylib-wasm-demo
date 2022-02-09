@@ -81,7 +81,7 @@
 
 (var bgm nil)
 
-(var bgm-volume 1)
+(var bgm-volume 0.5)
 
 ###########################################################################
 
@@ -556,7 +556,7 @@
       # XXX
       #(when (key-pressed? :m)
       #  (if (zero? bgm-volume)
-      #    (set bgm-volume 1)
+      #    (set bgm-volume 0.5)
       #    (set bgm-volume 0))
       #  (set-music-volume bgm bgm-volume))
       (when (key-pressed? :p)
