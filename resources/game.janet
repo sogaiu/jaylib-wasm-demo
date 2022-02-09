@@ -191,7 +191,7 @@
   (var collision false)
   #
   (cond
-    (key-down? :left)
+    (key-down? :a)
     (do
       # determine if moving left is possible
       (loop [j :down-to [(- grid-vertical-size 2) 0]]
@@ -212,7 +212,7 @@
               (put-in grid [i j] :empty))))
         (-- piece-position-x)))
     #
-    (key-down? :right)
+    (key-down? :d)
     (do
       # determine if moving right is possible
       (loop [j :down-to [(- grid-vertical-size 2) 0]]
@@ -238,7 +238,7 @@
 
 (defn resolve-turn-movement
   []
-  (when (key-down? :up)
+  (when (key-down? :w)
     (var aux nil)
     (var checker false)
     #
@@ -579,13 +579,13 @@
                 (++ lateral-movement-counter)
                 (++ turn-movement-counter)
                 # arrange for movement if necessary
-                (when (or (key-pressed? :left)
-                          (key-pressed? :right))
+                (when (or (key-pressed? :a)
+                          (key-pressed? :d))
                   (set lateral-movement-counter lateral-speed))
-                (when (key-pressed? :up)
+                (when (key-pressed? :w)
                   (set turn-movement-counter turning-speed))
                 # fall?
-                (when (and (key-down? :down)
+                (when (and (key-down? :s)
                            (>= fast-fall-movement-counter
                                fast-fall-await-counter))
                   (+= gravity-movement-counter gravity-speed))
