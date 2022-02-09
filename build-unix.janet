@@ -82,7 +82,6 @@
                "-Ijaylib/raylib/src"
                "--preload-file" preload-dir
                "--source-map-base" (string "http://localhost:" port "/")
-               "-s" "ASYNCIFY"
                "-s" "ASSERTIONS=2"
                "-s" "ALLOW_MEMORY_GROWTH=1"
                "-s" "FORCE_FILESYSTEM=1"
