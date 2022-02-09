@@ -90,7 +90,8 @@
 (printf "\n[compiling with emcc]...")
 (try
   (os/execute ["emcc.bat"
-               "-Os" "-Wall"
+               #"-v"
+               "-Wall"
                "-gsource-map"
                "-DPLATFORM_WEB"
                "-o" (string out-dir "/main.html")
@@ -105,13 +106,17 @@
                "--preload-file" preload-dir
                "--source-map-base" (string "http://localhost:" port "/")
                "--shell-file" "jaylib/raylib/src/shell.html"
-               "-s" "ASYNCIFY"
+               # -Os for non-ASYNCIFY, -O3 for ASYNCIFY
+               #"-Os"
+               "-O3" "-s" "ASYNCIFY"
                "-s" "ASSERTIONS=2"
                "-s" "ALLOW_MEMORY_GROWTH=1"
                "-s" "FORCE_FILESYSTEM=1"
                "-s" "USE_GLFW=3"
                "-s" `EXPORTED_RUNTIME_METHODS=['cwrap']`
-               "-s" "AGGRESSIVE_VARIABLE_ELIMINATION=1"]
+               "-s" "AGGRESSIVE_VARIABLE_ELIMINATION=1"
+               #"-s" "MINIFY_HTML=0"
+               ]
               :px)
   ([e]
     (eprintf "<<problem compiling with emcc>>")

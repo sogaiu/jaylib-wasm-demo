@@ -12,18 +12,16 @@
 #include "3d.h"
 
 #if defined(PLATFORM_WEB)
-#include <emscripten/emscripten.h>
+#include <emscripten/html5.h>
 #endif
 
 static JanetTable* core_env = NULL;
 
 static JanetFiber* game_fiber = NULL;
 
-static JanetFunction* udf_fn = NULL;
-
 void UpdateDrawFrame(void) {
   Janet ret;
-  JanetSignal status = janet_pcall(udf_fn, 0, NULL, &ret, &game_fiber);
+  JanetSignal status = janet_continue(game_fiber, janet_wrap_nil(), &ret);
   if (status == JANET_SIGNAL_ERROR) {
     janet_stacktrace(game_fiber, ret);
     janet_deinit();
@@ -64,21 +62,6 @@ int main(int argc, char** argv) {
 
   janet_gcroot(ret);
   game_fiber = janet_unwrap_fiber(ret);
-
-  status =
-    janet_dostring(core_env,
-                   "update-draw-frame",
-                   "JanetFunction", &ret);
-
-  if (status == JANET_SIGNAL_ERROR) {
-    printf("error getting update-draw-frame\n");
-    janet_deinit();
-    game_fiber = NULL;
-    return -1;
-  }
-
-  janet_gcroot(ret);
-  udf_fn = janet_unwrap_function(ret);
 
 #if defined(PLATFORM_WEB)
   // XXX: chrome dev console suggests using framerate of 0
