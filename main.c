@@ -52,6 +52,7 @@ int main(int argc, char** argv) {
   int status =
     janet_dostring(core_env,
                    "(import ./resources/game :prefix \"\")\n"
+                   // want this in c anyway, so "returning" this
                    "update-draw-frame",
                    "game.janet", &ret);
 
