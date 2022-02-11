@@ -776,12 +776,8 @@
 (def main-fiber
   (fiber/new
     (fn []
-      (while (not (j/window-should-close))
-        (update-draw-frame)
-        (yield))
-      #
-      (j/close-window))
-    :i))
+      # XXX: not actually used as the fiber gets reset
+      (yield))))
 
 # XXX: original code
 '(defn main

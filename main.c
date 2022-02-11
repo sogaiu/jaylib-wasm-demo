@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   int status =
     janet_dostring(core_env,
                    "(import ./resources/game :prefix \"\")\n"
-                   "main-fiber",
+                   "update-draw-frame",
                    "game.janet", &ret);
 
   if (status == JANET_SIGNAL_ERROR) {
@@ -63,22 +63,9 @@ int main(int argc, char** argv) {
   }
 
   janet_gcroot(ret);
-  game_fiber = janet_unwrap_fiber(ret);
-
-  status =
-    janet_dostring(core_env,
-                   "update-draw-frame",
-                   "JanetFunction", &ret);
-
-  if (status == JANET_SIGNAL_ERROR) {
-    printf("error getting update-draw-frame\n");
-    janet_deinit();
-    game_fiber = NULL;
-    return -1;
-  }
-
-  janet_gcroot(ret);
   udf_fn = janet_unwrap_function(ret);
+
+  game_fiber = janet_fiber(udf_fn, 64, 0, NULL);
 
 #if defined(PLATFORM_WEB)
   // XXX: chrome dev console suggests using framerate of 0
