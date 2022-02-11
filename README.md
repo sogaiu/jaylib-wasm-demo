@@ -62,7 +62,7 @@ dynamic variables are associated with each fiber.
 One alternative is to use `janet_continue`, which allows one to pass a
 fiber which doesn't get reset.  Since the same fiber can be reused
 without resetting, dynamic variables can be preserved between
-invocations.  However, Emscripten then produces somewhat broken code
+invocations.  However, Emscripten then produces somewhat broken code [1]
 unless `ASYNCIFY` is specified when compiling (this was discovered via
 a DevTools console message).  Using `ASYNCIFY` does yield running
 code, but the resulting code is likely slower due to added
@@ -74,6 +74,14 @@ In summary, current advice is:
 
 * if audio is desired, use `janet_pcall` and don't use dynamic variables
 * if audio is unneeded, one can use `janet_continue` instead
+
+[1] Currently, it's not clear why `ASYNCIFY` is necessary.  bakpakin's
+    `webrepl.c` for janet-lang.org's web REPL also uses
+    `janet_continue` but `ASYNCIFY` does not appear to be needed
+    there.  One difference that might be relevant is that the demo
+    would be triggering `janet_continue` via
+    `emscripten_set_main_loop`, while `webrepl.c`'s `janet_continue`
+    is user-triggered.
 
 ## Thanks
 
