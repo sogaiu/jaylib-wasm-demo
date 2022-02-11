@@ -764,7 +764,7 @@
 
 # now that a loop is not being done in janet, this needs to
 # happen
-(j/init-window screen-width screen-height `Jaylib Wasm Demo`)
+(j/init-window screen-width screen-height `Jaylib Demo`)
 
 (j/init-audio-device)
 (set bgm (j/load-music-stream "resources/theme.ogg"))
@@ -778,7 +778,7 @@
   [& args]
   #
   (j/set-config-flags :msaa-4x-hint)
-  (j/init-window screen-width screen-height `Jaylib Wasm Demo`)
+  (j/init-window screen-width screen-height `Jaylib Demo`)
   (j/set-target-fps 60)
   #
   (j/set-exit-key 0)
