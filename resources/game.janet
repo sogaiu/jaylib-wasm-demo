@@ -773,12 +773,6 @@
 
 (init-game)
 
-(def main-fiber
-  (fiber/new
-    (fn []
-      # XXX: not actually used as the fiber gets reset
-      (yield))))
-
 # XXX: original code
 '(defn main
   [& args]
