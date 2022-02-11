@@ -107,8 +107,8 @@
                "--source-map-base" (string "http://localhost:" port "/")
                "--shell-file" "jaylib/raylib/src/shell.html"
                # -Os for non-ASYNCIFY, -O3 for ASYNCIFY
-               #"-Os"
-               "-O3" "-s" "ASYNCIFY"
+               "-Os"
+               #"-O3" "-s" "ASYNCIFY"
                "-s" "ASSERTIONS=2"
                "-s" "ALLOW_MEMORY_GROWTH=1"
                "-s" "FORCE_FILESYSTEM=1"
