@@ -6,6 +6,23 @@
 
 ###########################################################################
 
+(defn customize-build-script
+  [src]
+  (def result @[])
+  #
+  (each line (string/split "\n" src)
+    (if (string/has-prefix? `build\janet_boot .` line)
+      (array/push result
+                  (string `build\janet_boot . `
+                          # this is what is being added
+                          `JANET_PATH resources/lib/janet `
+                          `> build\c\janet.c`))
+      (array/push result
+                  line)))
+  (string/join result "\n"))
+
+###########################################################################
+
 (def start (os/clock))
 
 (unless (os/getenv "EMSDK")
@@ -33,11 +50,16 @@
       ([e]
         (eprintf "<<problem with cleaning for janet>>")
         (os/exit 1)))
+    # create and execute custom build script
+    (def build-file-src (slurp "build_win.bat"))
+    (def custom-build-file-path "build_win_custom.bat")
+    (spit custom-build-file-path (customize-build-script build-file-src))
     (try
-      (os/execute ["build_win.bat"] :px)
+      (os/execute [custom-build-file-path] :px)
       ([e]
         (eprintf "<<problem building janet>>")
         (os/exit 1)))
+    #
     (try
       (os/cd old-dir)
       ([e]
@@ -85,7 +107,17 @@
       (os/cd old-dir)
       ([e]
         (eprintf "<<problem restoring current directory>>")
-        (os/exit 1)))))
+        (os/exit 1))))
+  #
+  (printf "\n[preparing jaylib.janet shim]...")
+  (try
+    (os/execute ["janet"
+                 "make-jaylib-janet-shim.janet"
+                 "jaylib/src"
+                 "resources/lib/janet/jaylib.janet"] :px)
+    ([e]
+      (eprintf "<<problem creating jaylib.janet shim>>")
+      (os/exit 1))))
 
 (printf "\n[compiling with emcc]...")
 (try
