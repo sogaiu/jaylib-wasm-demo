@@ -119,7 +119,15 @@
                  (string preload-dir "/lib/janet/jaylib.janet")] :px)
     ([e]
       (eprintf "<<problem creating jaylib.janet shim>>")
-      (os/exit 1))))
+      (os/exit 1)))
+  #
+  (printf "\n[copying logo into place]...")
+  (try
+    (spit (string out-dir "/jaylib-logo.png")
+          (slurp "jaylib-logo.png"))
+    ([e]
+      (eprintf "<<problem copying logo>>"
+               (os/exit 1)))))
 
 (printf "\n[compiling with emcc]...")
 (try
@@ -139,7 +147,7 @@
                "-Ijaylib/raylib/src"
                "--preload-file" preload-dir
                "--source-map-base" (string "http://localhost:" port "/")
-               "--shell-file" "jaylib/raylib/src/shell.html"
+               "--shell-file" "shell.html"
                # -Os for non-ASYNCIFY, -O3 for ASYNCIFY
                "-Os"
                #"-O3" "-s" "ASYNCIFY"
