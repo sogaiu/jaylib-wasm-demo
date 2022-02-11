@@ -51,7 +51,29 @@ The goal of this demo is to produce appropriate `.wasm`, `.js`, `.html`, and rel
 
     Visit http://localhost:8000 and click on `main.html`
 
----
+## Notes
+
+The "game loop" currently relies on invoking `janet_pcall` to invoke
+Janet code.  At present, this means dynamic variables from previous
+invocations are not preserved as `janet_pcall` resets passed fibers
+(or creates completely new ones).  This is at least partly beacuse
+dynamic variables are associated with each fiber.
+
+One alternative is to use `janet_continue`, which allows one to pass a
+fiber which doesn't get reset.  Since the same fiber can be reused
+without resetting, dynamic variables can be preserved between
+invocations.  However, Emscripten then produces somewhat broken code
+unless `ASYNCIFY` is specified when compiling (this was discovered via
+a DevTools console message).  Using `ASYNCIFY` does yield running
+code, but the resulting code is likely slower due to added
+instrumentation.  Additionally, at present, audio hasn't been made to
+work for the `janet_continue` + `ASYNCIFY` combination (at least in
+this demo)...
+
+In summary, current advice is:
+
+* if audio is desired, use `janet_pcall` and don't use dynamic variables
+* if audio is unneeded, one can use `janet_continue` instead
 
 ## Thanks
 
