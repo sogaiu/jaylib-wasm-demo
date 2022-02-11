@@ -66,7 +66,15 @@ int main(int argc, char** argv) {
   janet_gcroot(ret);
   udf_fn = janet_unwrap_function(ret);
 
+  /*
+  // XXX: unnecessary because janet_pcall will create a fiber if needed?
   game_fiber = janet_fiber(udf_fn, 64, 0, NULL);
+  if (game_fiber == NULL) {
+    printf("error getting a fiber");
+    janet_deinit();
+    return -1;
+  }
+  */
 
 #if defined(PLATFORM_WEB)
   // XXX: chrome dev console suggests using framerate of 0
