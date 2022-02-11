@@ -81,7 +81,6 @@ int main(int argc, char** argv) {
   //emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
   emscripten_set_main_loop(UpdateDrawFrame, 0, 1);
 #else
-  // XXX: don't use `setdyn` in `desktop`
   status =
     janet_dostring(core_env, "(desktop)", "source", &ret);
 
