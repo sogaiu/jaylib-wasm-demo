@@ -552,18 +552,16 @@
   []
   (if (not game-over)
     (do
-      # XXX
-      #(when (j/key-pressed? :m)
-      #  (if (zero? bgm-volume)
-      #    (set bgm-volume 0.5)
-      #    (set bgm-volume 0))
-      #  (j/set-music-volume bgm bgm-volume))
+      (when (j/key-pressed? :m)
+        (if (zero? bgm-volume)
+          (set bgm-volume 0.5)
+          (set bgm-volume 0))
+        (j/set-music-volume bgm bgm-volume))
       (when (j/key-pressed? :p)
         (set pause (not pause))
-        #(if pause
-        #  (j/pause-music-stream bgm)
-        #  (j/resume-music-stream bgm))
-        )
+        (if pause
+          (j/pause-music-stream bgm)
+          (j/resume-music-stream bgm)))
       #
       (when (not pause)
         (if (not line-to-delete)
