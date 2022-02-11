@@ -1,5 +1,7 @@
 #! /bin/sh
 
+PRELOAD_DIR=resources
+
 # exit if some part fails
 set -e
 
@@ -7,7 +9,7 @@ if [[ -z "${JAYLIB_WASM_DEMO_SKIP_DEPS}" ]]; then
     echo "[Preparing janet amalgamated bits]..."
     cd janet && \
         make clean && \
-        PREFIX=resources make && \
+        PREFIX=${PRELOAD_DIR} make && \
         cd ..
 
     echo "[Preparing libraylib.a]..."
@@ -17,8 +19,9 @@ if [[ -z "${JAYLIB_WASM_DEMO_SKIP_DEPS}" ]]; then
         cd ../../..
 
     echo "[Preparing jaylib.janet shim]..."
-    mkdir -p resources/lib/janet && \
-        janet make-jaylib-janet-shim.janet jaylib/src resources/lib/janet/jaylib.janet
+    mkdir -p ${PRELOAD_DIR}/lib/janet && \
+        janet make-jaylib-janet-shim.janet \
+              jaylib/src ${PRELOAD_DIR}/lib/janet/jaylib.janet
 fi
 
 [ -e janet/build/c/janet.c ] || \
