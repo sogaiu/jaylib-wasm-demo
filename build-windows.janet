@@ -15,7 +15,7 @@
       (array/push result
                   (string `build\janet_boot . `
                           # this is what is being added
-                          `JANET_PATH resources/lib/janet `
+                          `JANET_PATH ` preload-dir `/lib/janet `
                           `> build\c\janet.c`))
       (array/push result
                   line)))
@@ -110,11 +110,13 @@
         (os/exit 1))))
   #
   (printf "\n[preparing jaylib.janet shim]...")
+  (os/mkdir (string preload-dir "/lib"))
+  (os/mkdir (string preload-dir "/lib/janet"))
   (try
     (os/execute ["janet"
                  "make-jaylib-janet-shim.janet"
                  "jaylib/src"
-                 "resources/lib/janet/jaylib.janet"] :px)
+                 (string preload-dir "/lib/janet/jaylib.janet")] :px)
     ([e]
       (eprintf "<<problem creating jaylib.janet shim>>")
       (os/exit 1))))

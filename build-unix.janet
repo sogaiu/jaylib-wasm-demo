@@ -33,8 +33,8 @@
       ([e]
         (eprintf "<<problem with make clean for janet>>")
         (os/exit 1)))
-    # so janet will look in resources/lib/janet
-    (os/setenv "PREFIX" "resources")
+    # so janet will look in <preload-dir>/lib/janet
+    (os/setenv "PREFIX" preload-dir)
     (try
       (os/execute ["make"] :px)
       ([e]
@@ -73,11 +73,13 @@
         (os/exit 1))))
   #
   (printf "\n[preparing jaylib.janet shim]...")
+  (os/mkdir (string preload-dir "/lib"))
+  (os/mkdir (string preload-dir "/lib/janet"))
   (try
     (os/execute ["janet"
                  "make-jaylib-janet-shim.janet"
                  "jaylib/src"
-                 "resources/lib/janet/jaylib.janet"] :px)
+                 (string preload-dir "/lib/janet/jaylib.janet")] :px)
     ([e]
       (eprintf "<<problem creating jaylib.janet shim>>")
       (os/exit 1))))
