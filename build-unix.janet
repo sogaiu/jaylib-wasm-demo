@@ -82,15 +82,15 @@
                  (string preload-dir "/lib/janet/jaylib.janet")] :px)
     ([e]
       (eprintf "<<problem creating jaylib.janet shim>>")
-      (os/exit 1)))
-  #
-  (printf "\n[copying logo into place]...")
-  (try
-    (spit (string out-dir "/jaylib-logo.png")
-          (slurp "jaylib-logo.png"))
-    ([e]
-      (eprintf "<<problem copying logo>>"
-               (os/exit 1)))))
+      (os/exit 1))))
+
+(printf "\n[copying logo into place]...")
+(try
+  (spit (string out-dir "/jaylib-logo.png")
+        (slurp "jaylib-logo.png"))
+  ([e]
+    (eprintf "<<problem copying logo>>"
+             (os/exit 1))))
 
 (printf "\n[compiling with emcc]...")
 (try
