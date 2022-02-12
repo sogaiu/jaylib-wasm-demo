@@ -40,14 +40,38 @@
 
 (var pause false)
 
+# 2-d array with dimensions grid-horizontal-size x grid-vertical-size
+#
+# possibly values include:
+#
+# :empty  - space unoccupied
+# :full   - occupied (by what was part of past piece)
+# :moving - occupied by part of in-motion piece
+# :block  - pre-filled space - left, right, or bottom edge
+# :fading - about to be deleted / cleared
 (var grid @[])
 
+# 2-d array with dimensions piece-dim x piece-dim
+#
+# possible values include:
+#
+# :empty  - spot is empty
+# :moving - spot is part of piece
 (var piece @[])
 
+# same structure and content as piece
 (var incoming-piece @[])
 
+# x (horizontal) coordinate of top-left of "piece grid"
+#
+# "piece grid" is a piece-dim x piece-dim square of spots within the
+# game grid.  the spots within the "piece grid" that represent the
+# piece have the value :moving, while the other spots within the
+# "piece grid" that are not occupied by the piece have the value
+# :empty.
 (var piece-position-x 0)
 
+# y (vertical) coordinate of top-left of "piece grid"
 (var piece-position-y 0)
 
 (var fading-color nil)
@@ -58,10 +82,12 @@
 
 (var detection false)
 
+# whether any lines need to be deleted
 (var line-to-delete false)
 
 (var level 1)
 
+# number of lines deleted so far
 (var lines 0)
 
 (var gravity-movement-counter 0)
@@ -240,7 +266,7 @@
   (when (key-down? :w)
     (var aux nil)
     (var checker false)
-    #
+    # check whether rotation is not possible
     (when (and (= :moving
                   (get-in grid
                           [(+ piece-position-x 3) piece-position-y]))
@@ -401,7 +427,7 @@
                      (get-in grid
                              [(+ piece-position-x 2) (+ piece-position-y 2)])))
       (set checker true))
-    #
+    # rotate piece counterclockwise if appropriate
     (when (not checker)
       (set aux (get-in piece [0 0]))
       (put-in piece [0 0]
@@ -438,13 +464,13 @@
       (put-in piece [2 2]
               (get-in piece [1 2]))
       (put-in piece [1 2] aux))
-    #
+    # clear grid spots occupied that were occupied by piece
     (loop [j :down-to [(- grid-vertical-size 2) 0]]
       (for i 1 (dec grid-horizontal-size)
         (when (= :moving
                  (get-in grid [i j]))
           (put-in grid [i j] :empty))))
-    #
+    # fill grid spots that the piece occupies
     (for i piece-position-x (+ piece-position-x 4)
       (for j piece-position-y (+ piece-position-y 4)
         (when (= :moving
@@ -458,6 +484,8 @@
 
 (defn check-detection
   []
+  # check if spots below all of the spots occupied by a piece can be
+  # moved into (i.e. not :full and not :block)
   (loop [j :down-to [(- grid-vertical-size 2) 0]]
     (loop [i :range [1 (dec grid-horizontal-size)]]
       (when (and (= :moving
@@ -471,13 +499,16 @@
 (defn check-completion
   []
   (var calculator 0)
-  #
+  # determine if any lines need to be deleted
   (loop [j :down-to [(- grid-vertical-size 2) 0]]
     (set calculator 0)
+    # count spots that are occupied by stationary blocks (i.e. :full)
     (loop [i :range [1 (dec grid-horizontal-size)]]
       (when (= :full
                (get-in grid [i j]))
         (++ calculator))
+      # if appropriate, mark spots that need to be deleted and remember
+      # that at least one line needs to be deleted
       (when (= (- grid-horizontal-size 2)
                calculator)
         (set line-to-delete true)
@@ -487,11 +518,14 @@
 
 (defn delete-complete-lines
   []
+  # start at the bottom row (above the bottom :block row) and work way upward
   (loop [j :down-to [(- grid-vertical-size 2) 0]]
     (while (= :fading
-              (get-in grid [1 j]))
+              (get-in grid [1 j])) # if left-most spot is :fading, whole row is
+      # delete the current row by marking all spots in it :empty
       (for i 1 (dec grid-horizontal-size)
         (put-in grid [i j] :empty))
+      # shift all rows above down by one appropriately
       (loop [j2 :down-to [(dec j) 0]]
         (for i2 1 (dec grid-horizontal-size)
           (cond
@@ -511,16 +545,20 @@
   [a-grid]
   (each i (range grid-horizontal-size)
     (put a-grid i (array/new grid-vertical-size))
+    # work on a column at a time
     (each j (range grid-vertical-size)
       (if (or (= i 0)
               (= i (dec grid-horizontal-size))
               (= j (dec grid-vertical-size)))
+        # pre-fill left, right, and bottom edges of the grid
         (put-in a-grid [i j] :block)
+        # all other spots are :empty
         (put-in a-grid [i j] :empty))))
   a-grid)
 
 (defn init-piece
   [a-piece]
+  # mark all spots in a-piece :empty
   (each i (range piece-dim)
     (put a-piece i (array/new piece-dim))
     (each j (range grid-horizontal-size)
