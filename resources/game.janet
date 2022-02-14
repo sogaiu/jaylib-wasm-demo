@@ -433,18 +433,18 @@
               (get-in piece [1 2]))
       (put-in piece [1 2] aux))
     # clear grid spots occupied that were occupied by piece
-    (loop [j :down-to [(- grid-vertical-size 2) 0]]
-      (for i 1 (dec grid-horizontal-size)
-        (when (= :moving
-                 (get-in grid [i j]))
-          (put-in grid [i j] :empty))))
+    (loop [j :down-to [(- grid-vertical-size 2) 0]
+           i :range [1 (dec grid-horizontal-size)]
+           :when (= :moving
+                    (get-in grid [i j]))]
+      (put-in grid [i j] :empty))
     # fill grid spots that the piece occupies
-    (for i piece-position-x (+ piece-position-x 4)
-      (for j piece-position-y (+ piece-position-y 4)
-        (when (= :moving
-                 (get-in piece
-                         [(- i piece-position-x) (- j piece-position-y)]))
-          (put-in grid [i j] :moving))))
+    (loop [i :range [piece-position-x (+ piece-position-x 4)]
+           j :range [piece-position-y (+ piece-position-y 4)]
+           :when (= :moving
+                    (get-in piece
+                            [(- i piece-position-x) (- j piece-position-y)]))]
+      (put-in grid [i j] :moving))
     #
     (break true))
   #
