@@ -681,7 +681,7 @@
             (j/draw-rectangle offset-x offset-y
                               square-size square-size fading-color)
             #
-            (eprintf `Unexpected value: %p at %p, %p`
+            (eprintf "Unexpected value: %p at %p, %p"
                      (get-in grid [i j]) i j))
           (+= offset-x square-size))
         (set offset-x controller)
@@ -719,26 +719,26 @@
         (set offset-x controller)
         (+= offset-y square-size))
       #
-      (j/draw-text `INCOMING:`
+      (j/draw-text "INCOMING:"
                    offset-x (- offset-y 100)
                    10 :gray)
       # XXX: `text-format` doesn't exist, so using `string/format`
-      (j/draw-text (string/format `LINES:      %04i` lines)
+      (j/draw-text (string/format "LINES:      %04i" lines)
                    offset-x (+ offset-y 20)
                    10 :gray)
       (when pause
-        (j/draw-text `GAME PAUSED`
+        (j/draw-text "GAME PAUSED"
                      (- (/ screen-width 2)
-                        (/ (j/measure-text `GAME PAUSED` 40)
+                        (/ (j/measure-text "GAME PAUSED" 40)
                            2))
                      (- (/ screen-height 2)
                         40)
                      40 :gray)))
     # XXX: why are get-screen-width and get-screen-height used here
     #      when they are not above?
-    (j/draw-text `PRESS [ENTER] TO PLAY AGAIN`
+    (j/draw-text "PRESS [ENTER] TO PLAY AGAIN"
                  (- (/ (j/get-screen-width) 2)
-                    (/ (j/measure-text `PRESS [ENTER] TO PLAY AGAIN` 20)
+                    (/ (j/measure-text "PRESS [ENTER] TO PLAY AGAIN" 20)
                        2))
                  (- (/ (j/get-screen-height) 2)
                   50)
@@ -766,7 +766,7 @@
 
 # now that a loop is not being done in janet, this needs to
 # happen
-(j/init-window screen-width screen-height `Jaylib Demo`)
+(j/init-window screen-width screen-height "Jaylib Demo")
 
 (j/init-audio-device)
 (set bgm (j/load-music-stream "resources/theme.ogg"))
@@ -799,7 +799,7 @@
   [& args]
   #
   (j/set-config-flags :msaa-4x-hint)
-  (j/init-window screen-width screen-height `Jaylib Demo`)
+  (j/init-window screen-width screen-height "Jaylib Demo")
   (j/set-target-fps 60)
   #
   (j/set-exit-key 0)
