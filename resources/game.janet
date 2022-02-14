@@ -175,8 +175,9 @@
              i :range [1 (dec grid-x-size)]
              :when (= :moving
                       (get-in grid [i j]))]
-        (put-in grid [i (inc j)] :moving)
-        (put-in grid [i j] :empty))
+        (-> grid
+            (put-in [i (inc j)] :moving)
+            (put-in [i j] :empty)))
       (++ piece-pos-y))))
 
 (defn resolve-lateral-move
@@ -500,14 +501,14 @@
              i2 :range [1 (dec grid-x-size)]]
         (case (get-in grid [i2 j2])
           :full
-          (do
-            (put-in grid [i2 (inc j2)] :full)
-            (put-in grid [i2 j2] :empty))
+          (-> grid
+              (put-in [i2 (inc j2)] :full)
+              (put-in [i2 j2] :empty))
           #
           :fading
-          (do
-            (put-in grid [i2 (inc j2)] :fading)
-            (put-in grid [i2 j2] :empty)))))))
+          (-> grid
+              (put-in [i2 (inc j2)] :fading)
+              (put-in [i2 j2] :empty)))))))
 
 (defn init-grid
   [a-grid]
