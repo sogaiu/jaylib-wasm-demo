@@ -21,9 +21,31 @@ static JanetFiber* game_fiber = NULL;
 
 static JanetFunction* udf_fn = NULL;
 
+// janet_pcall, except if a non-NULL fiber is passed in, retain its env
+JanetSignal janet_pcall_keep_env(
+    JanetFunction *fun,
+    int32_t argc,
+    const Janet *argv,
+    Janet *out,
+    JanetFiber **f) {
+    JanetFiber *fiber;
+    if (f && *f) {
+        JanetTable* env = (*f)->env;
+        fiber = janet_fiber_reset(*f, fun, argc, argv);
+        fiber->env = env;
+    }
+    if (f) *f = fiber;
+    if (!fiber) {
+        *out = janet_cstringv("arity mismatch");
+        return JANET_SIGNAL_ERROR;
+    }
+    return janet_continue(fiber, janet_wrap_nil(), out);
+}
+
 void UpdateDrawFrame(void) {
   Janet ret;
-  JanetSignal status = janet_pcall(udf_fn, 0, NULL, &ret, &game_fiber);
+  JanetSignal status =
+    janet_pcall_keep_env(udf_fn, 0, NULL, &ret, &game_fiber);
   if (status == JANET_SIGNAL_ERROR) {
     janet_stacktrace(game_fiber, ret);
     janet_deinit();
@@ -53,7 +75,7 @@ int main(int argc, char** argv) {
     janet_dostring(core_env,
                    "(import ./resources/game :prefix \"\")\n"
                    // want this in c anyway, so "returning" this
-                   "update-draw-frame",
+                   "main-fiber",
                    "game.janet", &ret);
 
   if (status == JANET_SIGNAL_ERROR) {
@@ -64,17 +86,22 @@ int main(int argc, char** argv) {
   }
 
   janet_gcroot(ret);
-  udf_fn = janet_unwrap_function(ret);
+  game_fiber = janet_unwrap_fiber(ret);
 
-  /*
-  // XXX: unnecessary because janet_pcall will create a fiber if needed?
-  game_fiber = janet_fiber(udf_fn, 64, 0, NULL);
-  if (game_fiber == NULL) {
-    printf("error getting a fiber");
+  status =
+    janet_dostring(core_env,
+                   "update-draw-frame",
+                   "JanetFunction", &ret);
+
+  if (status == JANET_SIGNAL_ERROR) {
+    printf("error getting update-draw-frame\n");
     janet_deinit();
+    game_fiber = NULL;
     return -1;
   }
-  */
+
+  janet_gcroot(ret);
+  udf_fn = janet_unwrap_function(ret);
 
 #if defined(PLATFORM_WEB)
   // XXX: chrome dev console suggests using framerate of 0

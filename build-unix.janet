@@ -35,12 +35,14 @@
         (os/exit 1)))
     # so janet will look in <preload-dir>/lib/janet
     (os/setenv "PREFIX" preload-dir)
+    (os/setenv "CFLAGS" "-O0 -g3")
     (try
       (os/execute ["make"] :px)
       ([e]
         (eprintf "<<problem making janet>>")
         (os/exit 1)))
     (os/setenv "PREFIX")
+    (os/setenv "CFLAGS")
     (try
       (os/cd old-dir)
       ([e]
@@ -97,7 +99,9 @@
   (os/execute ["emcc"
                #"-v"
                "-Wall"
-               "-gsource-map"
+               # debugging
+               "-g3"
+               #"-gsource-map"
                "-DPLATFORM_WEB"
                "-o" (string out-dir "/main.html")
                "main.c"
@@ -109,8 +113,9 @@
                "--preload-file" preload-dir
                "--source-map-base" (string "http://localhost:" port "/")
                "--shell-file" "shell.html"
-               # -Os for non-ASYNCIFY, -O3 for ASYNCIFY
-               "-Os"
+               # -O0 for dev, -Os for non-ASYNCIFY, -O3 for ASYNCIFY
+               "-O0"
+               #"-Os"
                #"-O3" "-s" "ASYNCIFY"
                "-s" "ASSERTIONS=2"
                "-s" "ALLOW_MEMORY_GROWTH=1"

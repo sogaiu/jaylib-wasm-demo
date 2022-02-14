@@ -787,6 +787,12 @@
 
 (defn update-draw-frame
   []
+  # XXX
+  (when (zero? (mod (dyn :frame) 1000))
+    (let [d (os/date (os/time) true)]
+      (printf "%02d:%02d:%02d - %p"
+              (d :hours) (d :minutes) (d :seconds) (dyn :frame))))
+  (setdyn :frame (inc (dyn :frame)))
   (when bgm
     (j/update-music-stream bgm))
   (update-game)
@@ -807,6 +813,25 @@
 (j/set-music-volume bgm bgm-volume)
 
 (init-game)
+
+# XXX
+(setdyn :frame 0)
+
+# this fiber is used repeatedly by the c code, partly to maintain
+# dynamic variables (as those are per-fiber), but also because reusing
+# a fiber with a function is likely faster than parsing and compiling
+# code each time the game loop performs one iteration
+(def main-fiber
+  (fiber/new
+    (fn []
+      # XXX: this content only gets used when main.c uses janet_continue
+      (while (not (window-should-close))
+        (printf "frame: %p" (dyn :frame))
+        (setdyn :frame (inc (dyn :frame)))
+        (update-draw-frame)
+        (yield)))
+    # important for inheriting existing dynamic variables
+    :i))
 
 # XXX: original code
 '(defn main
