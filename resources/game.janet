@@ -162,21 +162,21 @@
   []
   (if detection
     # stop the piece
-    (loop [j :down-to [(- grid-vertical-size 2) 0]]
-      (loop [i :range [1 (dec grid-horizontal-size)]]
-        (when (= :moving
-                 (get-in grid [i j]))
-          (put-in grid [i j] :full)
-          (set detection false)
-          (set piece-active false))))
+    (loop [j :down-to [(- grid-vertical-size 2) 0]
+           i :range [1 (dec grid-horizontal-size)]
+           :when (= :moving
+                    (get-in grid [i j]))]
+      (put-in grid [i j] :full)
+      (set detection false)
+      (set piece-active false))
     # move the piece down
     (do
-      (loop [j :down-to [(- grid-vertical-size 2) 0]]
-        (loop [i :range [1 (dec grid-horizontal-size)]]
-          (when (= :moving
-                   (get-in grid [i j]))
-            (put-in grid [i (inc j)] :moving)
-            (put-in grid [i j] :empty))))
+      (loop [j :down-to [(- grid-vertical-size 2) 0]
+             i :range [1 (dec grid-horizontal-size)]
+             :when (= :moving
+                      (get-in grid [i j]))]
+        (put-in grid [i (inc j)] :moving)
+        (put-in grid [i j] :empty))
       (++ piece-position-y))))
 
 (defn resolve-lateral-movement
