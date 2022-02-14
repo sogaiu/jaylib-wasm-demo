@@ -189,12 +189,12 @@
       # determine if moving left is possible
       (loop [j :down-to [(- grid-vertical-size 2) 0]
              i :range [1 (dec grid-horizontal-size)]
-             :when (= :moving
-                      (get-in grid [i j]))]
-        (when (or (zero? (dec i))
-                  (= :full
-                     (get-in grid [(dec i) j])))
-          (set collision true)))
+             :when (and (= :moving
+                           (get-in grid [i j]))
+                        (or (zero? (dec i))
+                            (= :full
+                               (get-in grid [(dec i) j]))))]
+        (set collision true))
       # move left if possible
       (when (not collision)
         (loop [j :down-to [(- grid-vertical-size 2) 0]
@@ -210,13 +210,13 @@
       # determine if moving right is possible
       (loop [j :down-to [(- grid-vertical-size 2) 0]
              i :range [1 (dec grid-horizontal-size)]
-             :when (= :moving
-                      (get-in grid [i j]))]
-        (when (or (= (inc i)
-                     (dec grid-horizontal-size))
-                  (= :full
-                     (get-in grid [(inc i) j])))
-          (set collision true)))
+             :when (and (= :moving
+                           (get-in grid [i j]))
+                        (or (= (inc i)
+                               (dec grid-horizontal-size))
+                            (= :full
+                               (get-in grid [(inc i) j]))))]
+        (set collision true))
       # move right if possible
       (when (not collision)
         (loop [j :down-to [(- grid-vertical-size 2) 0]
