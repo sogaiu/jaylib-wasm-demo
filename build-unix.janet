@@ -35,14 +35,12 @@
         (os/exit 1)))
     # so janet will look in <preload-dir>/lib/janet
     (os/setenv "PREFIX" preload-dir)
-    (os/setenv "CFLAGS" "-O0 -g3")
     (try
       (os/execute ["make"] :px)
       ([e]
         (eprintf "<<problem making janet>>")
         (os/exit 1)))
     (os/setenv "PREFIX")
-    (os/setenv "CFLAGS")
     (try
       (os/cd old-dir)
       ([e]
