@@ -232,6 +232,14 @@
   #
   collision)
 
+(defn permute-units
+  [positions]
+  (var aux (get-in piece (first positions)))
+  (loop [i :range [0 (dec (length positions))]]
+    (put-in piece (get positions i)
+            (get-in piece (get positions (inc i)))))
+  (put-in piece (last positions) aux))
+
 (defn resolve-turn-move
   []
   (when (j/key-down? :w)
@@ -400,41 +408,10 @@
       (set checker true))
     # rotate piece counterclockwise if appropriate
     (when (not checker)
-      (set aux (get-in piece [0 0]))
-      (put-in piece [0 0]
-              (get-in piece [3 0]))
-      (put-in piece [3 0]
-              (get-in piece [3 3]))
-      (put-in piece [3 3]
-              (get-in piece [0 3]))
-      (put-in piece [0 3] aux)
-      #
-      (set aux (get-in piece [1 0]))
-      (put-in piece [1 0]
-              (get-in piece [3 1]))
-      (put-in piece [3 1]
-              (get-in piece [2 3]))
-      (put-in piece [2 3]
-              (get-in piece [0 2]))
-      (put-in piece [0 2] aux)
-      #
-      (set aux (get-in piece [2 0]))
-      (put-in piece [2 0]
-              (get-in piece [3 2]))
-      (put-in piece [3 2]
-              (get-in piece [1 3]))
-      (put-in piece [1 3]
-              (get-in piece [0 1]))
-      (put-in piece [0 1] aux)
-      #
-      (set aux (get-in piece [1 1]))
-      (put-in piece [1 1]
-              (get-in piece [2 1]))
-      (put-in piece [2 1]
-              (get-in piece [2 2]))
-      (put-in piece [2 2]
-              (get-in piece [1 2]))
-      (put-in piece [1 2] aux))
+      (permute-units [[0 0] [3 0] [3 3] [0 3]])
+      (permute-units [[1 0] [3 1] [2 3] [0 2]])
+      (permute-units [[2 0] [3 2] [1 3] [0 1]])
+      (permute-units [[1 1] [2 1] [2 2] [1 2]]))
     # clear grid spots occupied that were occupied by piece
     (loop [j :down-to [(- grid-y-size 2) 0]
            i :range [1 (dec grid-x-size)]
