@@ -216,7 +216,7 @@
   (var collision false)
   #
   (cond
-    (key-down? :a)
+    (j/key-down? :a)
     (do
       # determine if moving left is possible
       (loop [j :down-to [(- grid-vertical-size 2) 0]]
@@ -237,7 +237,7 @@
               (put-in grid [i j] :empty))))
         (-- piece-position-x)))
     #
-    (key-down? :d)
+    (j/key-down? :d)
     (do
       # determine if moving right is possible
       (loop [j :down-to [(- grid-vertical-size 2) 0]]
@@ -263,7 +263,7 @@
 
 (defn resolve-turn-movement
   []
-  (when (key-down? :w)
+  (when (j/key-down? :w)
     (var aux nil)
     (var checker false)
     # check whether rotation is not possible
