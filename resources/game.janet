@@ -572,7 +572,7 @@
     (for i 0 grid-x-size
       (case (get-in grid [i j])
         :empty
-        (do
+        (do # outline of square
           (j/draw-line offset-x offset-y
                        (+ offset-x square-size) offset-y
                        :light-gray)
