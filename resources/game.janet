@@ -547,122 +547,137 @@
       (init-game)
       (set game-over false))))
 
+(defn draw-grid
+  []
+  (var offset-x
+    (- (/ screen-width 2)
+       (* grid-x-size (/ square-size 2))
+       50))
+  (var offset-y
+    (- (/ screen-height 2)
+       (+ (* (dec grid-y-size) (/ square-size 2))
+          (* square-size 2))
+       50))
+  (var controller offset-x)
+  # draw grid
+  (for j 0 grid-y-size
+    (for i 0 grid-x-size
+      (case (get-in grid [i j])
+        :empty
+        (do
+          (j/draw-line offset-x offset-y
+                       (+ offset-x square-size) offset-y
+                       :light-gray)
+          (j/draw-line offset-x offset-y
+                       offset-x (+ offset-y square-size)
+                       :light-gray)
+          (j/draw-line (+ offset-x square-size) offset-y
+                       (+ offset-x square-size) (+ offset-y square-size)
+                       :light-gray)
+          (j/draw-line offset-x (+ offset-y square-size)
+                       (+ offset-x square-size) (+ offset-y square-size)
+                       :light-gray))
+        #
+        :full
+        (j/draw-rectangle offset-x offset-y
+                          square-size square-size :black)
+        #
+        :moving
+        (j/draw-rectangle offset-x offset-y
+                          square-size square-size :dark-gray)
+        #
+        :block
+        (j/draw-rectangle offset-x offset-y
+                          square-size square-size :light-gray)
+        #
+        :fading
+        (j/draw-rectangle offset-x offset-y
+                          square-size square-size fading-color)
+        #
+        (eprintf "Unexpected value: %p at %p, %p"
+                 (get-in grid [i j]) i j))
+      (+= offset-x square-size))
+    (set offset-x controller)
+    (+= offset-y square-size)))
+
+(defn draw-info-box
+  [x y]
+  (var offset-x x)
+  (var offset-y y)
+  (var controller offset-x)
+  # draw future piece
+  (for j 0 piece-dim
+    (for i 0 piece-dim
+      (case (get-in future-piece [i j])
+        :empty
+        (do
+          (j/draw-line offset-x offset-y
+                       (+ offset-x square-size) offset-y
+                       :light-gray)
+          (j/draw-line offset-x offset-y
+                       offset-x (+ offset-y square-size)
+                       :light-gray)
+          (j/draw-line (+ offset-x square-size) offset-y
+                       (+ offset-x square-size) (+ offset-y square-size)
+                       :light-gray)
+          (j/draw-line offset-x (+ offset-y square-size)
+                       (+ offset-x square-size) (+ offset-y square-size)
+                       :light-gray)
+          (+= offset-x square-size))
+        #
+        :moving
+        (do
+          (j/draw-rectangle offset-x offset-y
+                            square-size square-size :gray)
+          (+= offset-x square-size))))
+    (set offset-x controller)
+    (+= offset-y square-size))
+  # label future piece box
+  (j/draw-text "UPCOMING:"
+               offset-x (- offset-y 100)
+               10 :gray)
+  # show how many lines completed so far
+  (j/draw-text (string/format "LINES:      %04i" lines)
+               offset-x (+ offset-y 20)
+               10 :gray)
+  [offset-x offset-y])
+
+(defn draw-pause-overlay
+  []
+  (j/draw-text "GAME PAUSED"
+               (- (/ screen-width 2)
+                  (/ (j/measure-text "GAME PAUSED" 40)
+                     2))
+               (- (/ screen-height 2)
+                  40)
+               40 :gray))
+
+(defn draw-play-again-overlay
+  []
+  # XXX: why are get-screen-width and get-screen-height used here
+  #      when they are not in draw-grid and draw-pause-overlay?
+  (j/draw-text "PRESS [ENTER] TO PLAY AGAIN"
+               (- (/ (j/get-screen-width) 2)
+                  (/ (j/measure-text "PRESS [ENTER] TO PLAY AGAIN" 20)
+                     2))
+               (- (/ (j/get-screen-height) 2)
+                  50)
+               20 :gray))
+
 (defn draw-game
   []
   (j/begin-drawing)
   #
   (j/clear-background :dark-green)
   #
-  (if (not game-over)
+  (if game-over
+    (draw-play-again-overlay)
     (do
-      (var offset-x
-        (- (/ screen-width 2)
-           (* grid-x-size (/ square-size 2))
-           50))
-      (var offset-y
-        (- (/ screen-height 2)
-           (+ (* (dec grid-y-size) (/ square-size 2))
-              (* square-size 2))
-           50))
-      (var controller offset-x)
-      # draw grid
-      (for j 0 grid-y-size
-        (for i 0 grid-x-size
-          (case (get-in grid [i j])
-            :empty
-            (do
-              (j/draw-line offset-x offset-y
-                           (+ offset-x square-size) offset-y
-                           :light-gray)
-              (j/draw-line offset-x offset-y
-                           offset-x (+ offset-y square-size)
-                           :light-gray)
-              (j/draw-line (+ offset-x square-size) offset-y
-                           (+ offset-x square-size) (+ offset-y square-size)
-                           :light-gray)
-              (j/draw-line offset-x (+ offset-y square-size)
-                           (+ offset-x square-size) (+ offset-y square-size)
-                           :light-gray))
-            #
-            :full
-            (j/draw-rectangle offset-x offset-y
-                              square-size square-size :black)
-            #
-            :moving
-            (j/draw-rectangle offset-x offset-y
-                              square-size square-size :dark-gray)
-            #
-            :block
-            (j/draw-rectangle offset-x offset-y
-                              square-size square-size :light-gray)
-            #
-            :fading
-            (j/draw-rectangle offset-x offset-y
-                              square-size square-size fading-color)
-            #
-            (eprintf "Unexpected value: %p at %p, %p"
-                     (get-in grid [i j]) i j))
-          (+= offset-x square-size))
-        (set offset-x controller)
-        (+= offset-y square-size))
-      # XXX: hard-coded
-      (set offset-x 500)
-      (set offset-y 45)
-      # XXX: original had a second variable with name missing an l
-      (set controller offset-x)
-      # draw piece
-      (for j 0 piece-dim
-        (for i 0 piece-dim
-          (case (get-in future-piece [i j])
-            :empty
-            (do
-              (j/draw-line offset-x offset-y
-                           (+ offset-x square-size) offset-y
-                           :light-gray)
-              (j/draw-line offset-x offset-y
-                           offset-x (+ offset-y square-size)
-                           :light-gray)
-              (j/draw-line (+ offset-x square-size) offset-y
-                           (+ offset-x square-size) (+ offset-y square-size)
-                           :light-gray)
-              (j/draw-line offset-x (+ offset-y square-size)
-                           (+ offset-x square-size) (+ offset-y square-size)
-                           :light-gray)
-              (+= offset-x square-size))
-            #
-            :moving
-            (do
-              (j/draw-rectangle offset-x offset-y
-                                square-size square-size :gray)
-              (+= offset-x square-size))))
-        (set offset-x controller)
-        (+= offset-y square-size))
-      # label future piece box
-      (j/draw-text "UPCOMING:"
-                   offset-x (- offset-y 100)
-                   10 :gray)
-      # show how many lines completed so far
-      # XXX: `text-format` doesn't exist, so using `string/format`
-      (j/draw-text (string/format "LINES:      %04i" lines)
-                   offset-x (+ offset-y 20)
-                   10 :gray)
+      (draw-grid)
+      (draw-info-box 500 45) # XXX: hard-coded
+      # show pause overlay when appropriate
       (when pause
-        (j/draw-text "GAME PAUSED"
-                     (- (/ screen-width 2)
-                        (/ (j/measure-text "GAME PAUSED" 40)
-                           2))
-                     (- (/ screen-height 2)
-                        40)
-                     40 :gray)))
-    # XXX: why are get-screen-width and get-screen-height used here
-    #      when they are not above?
-    (j/draw-text "PRESS [ENTER] TO PLAY AGAIN"
-                 (- (/ (j/get-screen-width) 2)
-                    (/ (j/measure-text "PRESS [ENTER] TO PLAY AGAIN" 20)
-                       2))
-                 (- (/ (j/get-screen-height) 2)
-                  50)
-               20 :gray))
+        (draw-pause-overlay))))
   #
   (j/end-drawing))
 
