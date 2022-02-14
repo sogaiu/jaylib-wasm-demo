@@ -647,6 +647,7 @@
               (* square-size 2))
            50))
       (var controller offset-x)
+      # draw grid
       (for j 0 grid-y-size
         (for i 0 grid-x-size
           (case (get-in grid [i j])
@@ -691,7 +692,7 @@
       (set offset-y 45)
       # XXX: original had a second variable with name missing an l
       (set controller offset-x)
-      #
+      # draw piece
       (for j 0 piece-dim
         (for i 0 piece-dim
           (case (get-in future-piece [i j])
@@ -718,10 +719,11 @@
               (+= offset-x square-size))))
         (set offset-x controller)
         (+= offset-y square-size))
-      #
+      # label future piece box
       (j/draw-text "UPCOMING:"
                    offset-x (- offset-y 100)
                    10 :gray)
+      # show how many lines completed so far
       # XXX: `text-format` doesn't exist, so using `string/format`
       (j/draw-text (string/format "LINES:      %04i" lines)
                    offset-x (+ offset-y 20)
