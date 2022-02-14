@@ -473,20 +473,31 @@
   (set grid (init-grid grid))
   (set future-piece (init-piece future-piece)))
 
+(defn toggle-mute
+  []
+  (if (zero? bgm-volume)
+    (set bgm-volume 0.5)
+    (set bgm-volume 0))
+  (j/set-music-volume bgm bgm-volume))
+
+(defn toggle-pause
+  []
+  (set pause (not pause))
+  (if pause
+    (j/pause-music-stream bgm)
+    (j/resume-music-stream bgm)))
+
 (defn update-game
   []
-  (if (not game-over)
+  (if game-over
+    (when (j/key-pressed? :enter)
+      (init-game)
+      (set game-over false))
     (do
       (when (j/key-pressed? :m)
-        (if (zero? bgm-volume)
-          (set bgm-volume 0.5)
-          (set bgm-volume 0))
-        (j/set-music-volume bgm bgm-volume))
+        (toggle-mute))
       (when (j/key-pressed? :p)
-        (set pause (not pause))
-        (if pause
-          (j/pause-music-stream bgm)
-          (j/resume-music-stream bgm)))
+        (toggle-pause))
       #
       (when (not pause)
         (if (not line-to-delete)
@@ -542,10 +553,7 @@
               (delete-complete-lines)
               (set fade-line-counter 0)
               (set line-to-delete false)
-              (++ lines))))))
-    (when (j/key-pressed? :enter)
-      (init-game)
-      (set game-over false))))
+              (++ lines))))))))
 
 (defn draw-grid
   []
