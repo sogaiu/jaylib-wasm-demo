@@ -719,7 +719,7 @@
         (set offset-x controller)
         (+= offset-y square-size))
       #
-      (j/draw-text "INCOMING:"
+      (j/draw-text "UPCOMING:"
                    offset-x (- offset-y 100)
                    10 :gray)
       # XXX: `text-format` doesn't exist, so using `string/format`
