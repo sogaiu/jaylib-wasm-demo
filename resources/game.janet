@@ -128,7 +128,8 @@
   # choose a random piece
   # XXX: docs say math/rng-int will return up through max, but only max - 1?
   (loop [a-unit :in (get pieces
-                         (math/rng-int an-rng (+ 6 1)))]
+                         (math/rng-int an-rng
+                                       (+ (dec (length pieces)) 1)))]
     (put-in incoming-piece a-unit :moving)))
 
 (defn create-piece
