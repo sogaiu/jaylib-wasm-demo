@@ -187,44 +187,44 @@
     (j/key-down? :a)
     (do
       # determine if moving left is possible
-      (loop [j :down-to [(- grid-vertical-size 2) 0]]
-        (loop [i :range [1 (dec grid-horizontal-size)]]
-          (when (= :moving
-                   (get-in grid [i j]))
-            (when (or (zero? (dec i))
-                      (= :full
-                         (get-in grid [(dec i) j])))
-              (set collision true)))))
+      (loop [j :down-to [(- grid-vertical-size 2) 0]
+             i :range [1 (dec grid-horizontal-size)]
+             :when (= :moving
+                      (get-in grid [i j]))]
+        (when (or (zero? (dec i))
+                  (= :full
+                     (get-in grid [(dec i) j])))
+          (set collision true)))
       # move left if possible
       (when (not collision)
-        (loop [j :down-to [(- grid-vertical-size 2) 0]]
-          (loop [i :range [1 (dec grid-horizontal-size)]]
-            (when (= :moving
-                     (get-in grid [i j]))
-              (put-in grid [(dec i) j] :moving)
-              (put-in grid [i j] :empty))))
+        (loop [j :down-to [(- grid-vertical-size 2) 0]
+               i :range [1 (dec grid-horizontal-size)]
+               :when (= :moving
+                        (get-in grid [i j]))]
+          (put-in grid [(dec i) j] :moving)
+          (put-in grid [i j] :empty))
         (-- piece-position-x)))
     #
     (j/key-down? :d)
     (do
       # determine if moving right is possible
-      (loop [j :down-to [(- grid-vertical-size 2) 0]]
-        (loop [i :range [1 (dec grid-horizontal-size)]]
-          (when (= :moving
-                   (get-in grid [i j]))
-            (when (or (= (inc i)
-                         (dec grid-horizontal-size))
-                      (= :full
-                         (get-in grid [(inc i) j])))
-              (set collision true)))))
+      (loop [j :down-to [(- grid-vertical-size 2) 0]
+             i :range [1 (dec grid-horizontal-size)]
+             :when (= :moving
+                      (get-in grid [i j]))]
+        (when (or (= (inc i)
+                     (dec grid-horizontal-size))
+                  (= :full
+                     (get-in grid [(inc i) j])))
+          (set collision true)))
       # move right if possible
       (when (not collision)
-        (loop [j :down-to [(- grid-vertical-size 2) 0]]
-          (loop [i :down-to [(dec grid-horizontal-size) 1]]
-            (when (= :moving
-                     (get-in grid [i j]))
-              (put-in grid [(inc i) j] :moving)
-              (put-in grid [i j] :empty))))
+        (loop [j :down-to [(- grid-vertical-size 2) 0]
+               i :down-to [(dec grid-horizontal-size) 1]
+               :when (= :moving
+                        (get-in grid [i j]))]
+          (put-in grid [(inc i) j] :moving)
+          (put-in grid [i j] :empty))
         (++ piece-position-x))))
   #
   collision)
