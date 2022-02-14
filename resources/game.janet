@@ -125,6 +125,7 @@
      [[1 0] [1 1] [1 2] [2 1]]   # T
      [[1 1] [2 1] [2 2] [3 2]]   # Z
      [[1 2] [2 2] [2 1] [3 1]]]) # S
+  # choose a random piece
   # XXX: docs say math/rng-int will return up through max, but only max - 1?
   (loop [a-unit :in (get pieces
                          (math/rng-int an-rng (+ 6 1)))]
