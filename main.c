@@ -12,7 +12,7 @@
 #include "3d.h"
 
 #if defined(PLATFORM_WEB)
-#include <emscripten/html5.h>
+#include <emscripten/emscripten.h>
 #endif
 
 static JanetTable* core_env = NULL;
