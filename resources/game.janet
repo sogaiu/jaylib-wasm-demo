@@ -60,7 +60,7 @@
 (var piece @[])
 
 # same structure and content as piece
-(var incoming-piece @[])
+(var future-piece @[])
 
 # x-coordinate of top-left of "piece grid"
 #
@@ -112,10 +112,10 @@
 
 (defn get-random-piece
   []
-  # empty out incoming-piece
+  # empty out future-piece
   (loop [i :range [0 piece-dim]
          j :range [0 piece-dim]]
-    (put-in incoming-piece [i j] :empty))
+    (put-in future-piece [i j] :empty))
   #
   (def pieces
     [[[1 1] [2 1] [1 2] [2 2]]   # O
@@ -130,7 +130,7 @@
   (loop [a-unit :in (get pieces
                          (math/rng-int an-rng
                                        (+ (dec (length pieces)) 1)))]
-    (put-in incoming-piece a-unit :moving)))
+    (put-in future-piece a-unit :moving)))
 
 (defn create-piece
   []
@@ -142,12 +142,12 @@
   (when begin-play
     (get-random-piece)
     (set begin-play false))
-  # copy newly obtained incoming-piece to piece
+  # copy newly obtained future-piece to piece
   (loop [i :range [0 piece-dim]
          j :range [0 piece-dim]]
     (put-in piece [i j]
-            (get-in incoming-piece [i j])))
-  # get another incoming piece
+            (get-in future-piece [i j])))
+  # get another future piece
   (get-random-piece)
   # put the piece in the grid
   (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
@@ -553,7 +553,7 @@
   (set fade-line-counter 0)
   (set gravity-speed 30)
   (set grid (init-grid grid))
-  (set incoming-piece (init-piece incoming-piece)))
+  (set future-piece (init-piece future-piece)))
 
 (defn update-game
   []
@@ -694,7 +694,7 @@
       #
       (for j 0 piece-dim
         (for i 0 piece-dim
-          (case (get-in incoming-piece [i j])
+          (case (get-in future-piece [i j])
             :empty
             (do
               (j/draw-line offset-x offset-y
