@@ -484,7 +484,7 @@
                calculator)
         (set line-to-delete true)
         (set calculator 0)
-        (for z 1 (dec grid-x-size)
+        (loop [z :range [1 (dec grid-x-size)]]
           (put-in grid [z j] :fading))))))
 
 (defn delete-complete-lines
@@ -494,7 +494,7 @@
     (while (= :fading
               (get-in grid [1 j])) # if left-most spot is :fading, whole row is
       # delete the current row by marking all spots in it :empty
-      (for i 1 (dec grid-x-size)
+      (loop [i :range [1 (dec grid-x-size)]]
         (put-in grid [i j] :empty))
       # shift all rows above down by one appropriately
       (loop [j2 :down-to [(dec j) 0]
@@ -610,11 +610,11 @@
                   (when (resolve-turn-move)
                     (set turn-move-counter 0)))))
             # game over?
-            (for j 0 2 # XXX: 2?
-              (for i 1 (dec grid-x-size)
-                (when (= :full
-                         (get-in grid [i j]))
-                  (set game-over true)))))
+            (loop [j :range [0 2] # XXX: 2?
+                   i :range [1 (dec grid-x-size)]
+                   :when (= :full
+                            (get-in grid [i j]))]
+              (set game-over true)))
           (do # there is a line to delete
             (++ fade-line-counter)
             (if (< (% fade-line-counter 8) 4)
