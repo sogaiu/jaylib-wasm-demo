@@ -112,36 +112,23 @@
 
 (defn get-random-piece
   []
-  (def random
-    # XXX: docs say math/rng-int will return up through max, but only max - 1?
-    (math/rng-int an-rng (+ 6 1)))
   # empty out incoming-piece
-  (for i 0 piece-dim
-    (for j 0 piece-dim
-      (put-in incoming-piece [i j] :empty)))
+  (loop [i :range [0 piece-dim]
+         j :range [0 piece-dim]]
+    (put-in incoming-piece [i j] :empty))
   #
-  (case random
-    0
-    (each u [[1 1] [2 1] [1 2] [2 2]]    # O
-      (put-in incoming-piece u :moving))
-    1
-    (each u [[1 0] [1 1] [1 2] [2 2]]    # L
-      (put-in incoming-piece u :moving))
-    2
-    (each u [[1 2] [2 0] [2 1] [2 2]]    # J
-      (put-in incoming-piece u :moving))
-    3
-    (each u [[0 1] [1 1] [2 1] [3 1]]    # I
-      (put-in incoming-piece u :moving))
-    4
-    (each u [[1 0] [1 1] [1 2] [2 1]]    # T
-      (put-in incoming-piece u :moving))
-    5
-    (each u [[1 1] [2 1] [2 2] [3 2]]    # Z
-      (put-in incoming-piece u :moving))
-    6
-    (each u [[1 2] [2 2] [2 1] [3 1]]    # S
-      (put-in incoming-piece u :moving))))
+  (def pieces
+    [[[1 1] [2 1] [1 2] [2 2]]   # O
+     [[1 0] [1 1] [1 2] [2 2]]   # L
+     [[1 2] [2 0] [2 1] [2 2]]   # J
+     [[0 1] [1 1] [2 1] [3 1]]   # I
+     [[1 0] [1 1] [1 2] [2 1]]   # T
+     [[1 1] [2 1] [2 2] [3 2]]   # Z
+     [[1 2] [2 2] [2 1] [3 1]]]) # S
+  # XXX: docs say math/rng-int will return up through max, but only max - 1?
+  (loop [a-unit :in (get pieces
+                         (math/rng-int an-rng (+ 6 1)))]
+    (put-in incoming-piece a-unit :moving)))
 
 (defn create-piece
   []
