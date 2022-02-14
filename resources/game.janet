@@ -663,35 +663,27 @@
                            :light-gray)
               (j/draw-line offset-x (+ offset-y square-size)
                            (+ offset-x square-size) (+ offset-y square-size)
-                           :light-gray)
-              (+= offset-x square-size))
+                           :light-gray))
             #
             :full
-            (do
-              (j/draw-rectangle offset-x offset-y
-                                square-size square-size :black)
-              (+= offset-x square-size))
+            (j/draw-rectangle offset-x offset-y
+                              square-size square-size :black)
             #
             :moving
-            (do
-              (j/draw-rectangle offset-x offset-y
-                                square-size square-size :dark-gray)
-              (+= offset-x square-size))
+            (j/draw-rectangle offset-x offset-y
+                              square-size square-size :dark-gray)
             #
             :block
-            (do
-              (j/draw-rectangle offset-x offset-y
-                                square-size square-size :light-gray)
-              (+= offset-x square-size))
+            (j/draw-rectangle offset-x offset-y
+                              square-size square-size :light-gray)
             #
             :fading
-            (do
-              (j/draw-rectangle offset-x offset-y
-                                square-size square-size fading-color)
-              (+= offset-x square-size))
+            (j/draw-rectangle offset-x offset-y
+                              square-size square-size fading-color)
             #
             (eprintf `Unexpected value: %p at %p, %p`
-                     (get-in grid [i j]) i j)))
+                     (get-in grid [i j]) i j))
+          (+= offset-x square-size))
         (set offset-x controller)
         (+= offset-y square-size))
       # XXX: hard-coded
