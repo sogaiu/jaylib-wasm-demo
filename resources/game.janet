@@ -644,25 +644,27 @@
 
 (defn draw-pause-overlay
   []
-  (j/draw-text "GAME PAUSED"
-               (- (/ screen-width 2)
-                  (/ (j/measure-text "GAME PAUSED" 40)
-                     2))
-               (- (/ screen-height 2)
-                  40)
-               40 :gray))
+  (let [message "GAME PAUSED"]
+    (j/draw-text message
+                 (- (/ screen-width 2)
+                    (/ (j/measure-text message 40)
+                       2))
+                 (- (/ screen-height 2)
+                    40)
+                 40 :gray)))
 
 (defn draw-play-again-overlay
   []
-  # XXX: why are get-screen-width and get-screen-height used here
-  #      when they are not in draw-grid and draw-pause-overlay?
-  (j/draw-text "PRESS [ENTER] TO PLAY AGAIN"
-               (- (/ (j/get-screen-width) 2)
-                  (/ (j/measure-text "PRESS [ENTER] TO PLAY AGAIN" 20)
-                     2))
-               (- (/ (j/get-screen-height) 2)
-                  50)
-               20 :gray))
+  (let [message "PRESS [ENTER] TO PLAY AGAIN"]
+    # XXX: why are get-screen-width and get-screen-height used here
+    #      when they are not in draw-grid and draw-pause-overlay?
+    (j/draw-text message
+                 (- (/ (j/get-screen-width) 2)
+                    (/ (j/measure-text message 20)
+                       2))
+                 (- (/ (j/get-screen-height) 2)
+                    50)
+                 20 :gray)))
 
 (defn draw-game
   []
