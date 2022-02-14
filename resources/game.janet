@@ -454,15 +454,15 @@
   []
   # check if spots below all of the spots occupied by a piece can be
   # moved into (i.e. not :full and not :block)
-  (loop [j :down-to [(- grid-vertical-size 2) 0]]
-    (loop [i :range [1 (dec grid-horizontal-size)]]
-      (when (and (= :moving
-                    (get-in grid [i j]))
-                 (or (= :full
-                        (get-in grid [i (inc j)]))
-                     (= :block
-                        (get-in grid [i (inc j)]))))
-        (set detection true)))))
+  (loop [j :down-to [(- grid-vertical-size 2) 0]
+         i :range [1 (dec grid-horizontal-size)]
+         :when (and (= :moving
+                       (get-in grid [i j]))
+                    (or (= :full
+                           (get-in grid [i (inc j)]))
+                        (= :block
+                           (get-in grid [i (inc j)]))))]
+    (set detection true)))
 
 (defn check-completion
   []
