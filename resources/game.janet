@@ -496,18 +496,16 @@
       # shift all rows above down by one appropriately
       (loop [j2 :down-to [(dec j) 0]
              i2 :range [1 (dec grid-horizontal-size)]]
-          (cond
-            (= :full
-               (get-in grid [i2 j2]))
-            (do
-              (put-in grid [i2 (inc j2)] :full)
-              (put-in grid [i2 j2] :empty))
-            #
-            (= :fading
-               (get-in grid [i2 j2]))
-            (do
-              (put-in grid [i2 (inc j2)] :fading)
-              (put-in grid [i2 j2] :empty)))))))
+        (case (get-in grid [i2 j2])
+          :full
+          (do
+            (put-in grid [i2 (inc j2)] :full)
+            (put-in grid [i2 j2] :empty))
+          #
+          :fading
+          (do
+            (put-in grid [i2 (inc j2)] :fading)
+            (put-in grid [i2 j2] :empty)))))))
 
 (defn init-grid
   [a-grid]
