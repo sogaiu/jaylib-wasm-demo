@@ -134,7 +134,9 @@
   (os/execute ["emcc.bat"
                #"-v"
                "-Wall"
-               "-gsource-map"
+               # debugging
+               "-g3"
+               #"-gsource-map"
                "-DPLATFORM_WEB"
                "-o" (string out-dir "/main.html")
                "main.c"
@@ -148,8 +150,9 @@
                "--preload-file" preload-dir
                "--source-map-base" (string "http://localhost:" port "/")
                "--shell-file" "shell.html"
-               # -Os for non-ASYNCIFY, -O3 for ASYNCIFY
-               "-Os"
+               # -O0 for dev, -Os for non-ASYNCIFY, -O3 for ASYNCIFY
+               "-O0"
+               #"-Os"
                #"-O3" "-s" "ASYNCIFY"
                "-s" "ASSERTIONS=2"
                "-s" "ALLOW_MEMORY_GROWTH=1"
