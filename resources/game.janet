@@ -232,186 +232,127 @@
   #
   collision)
 
-(defn permute-units
-  [positions]
-  (var aux (get-in piece (first positions)))
-  (loop [i :range [0 (dec (length positions))]]
-    (put-in piece (get positions i)
-            (get-in piece (get positions (inc i)))))
-  (put-in piece (last positions) aux))
+(defn can-rotate?
+  []
+  (not
+    (or (and (= :moving
+                (get-in grid [(+ piece-pos-x 3) piece-pos-y]))
+             (not= :empty
+                   (get-in grid [piece-pos-x piece-pos-y]))
+             (not= :moving
+                   (get-in grid [piece-pos-x piece-pos-y])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 3)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 3) piece-pos-y]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 3) piece-pos-y])))
+        (and (= :moving
+                (get-in grid [piece-pos-x (+ piece-pos-y 3)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 3)]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 3)])))
+        (and (= :moving
+                (get-in grid [piece-pos-x piece-pos-y]))
+             (not= :empty
+                   (get-in grid [piece-pos-x (+ piece-pos-y 3)]))
+             (not= :moving
+                   (get-in grid [piece-pos-x (+ piece-pos-y 3)])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 1) piece-pos-y]))
+             (not= :empty
+                   (get-in grid [piece-pos-x (+ piece-pos-y 2)]))
+             (not= :moving
+                   (get-in grid [piece-pos-x (+ piece-pos-y 2)])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 1)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 1) piece-pos-y]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 1) piece-pos-y])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 3)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 1)]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 1)])))
+        (and (= :moving
+                (get-in grid [piece-pos-x (+ piece-pos-y 2)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 3)]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 3)])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 2) piece-pos-y]))
+             (not= :empty
+                   (get-in grid [piece-pos-x (+ piece-pos-y 1)]))
+             (not= :moving
+                   (get-in grid [piece-pos-x (+ piece-pos-y 1)])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 2)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 2) piece-pos-y]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 2) piece-pos-y])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 3)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 2)]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 2)])))
+        (and (= :moving
+                (get-in grid [piece-pos-x (+ piece-pos-y 1)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 3)]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 3)])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 1)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 2)]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 2)])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 1)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 1)]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 1)])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 2)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 1)]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 1)])))
+        (and (= :moving
+                (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 2)]))
+             (not= :empty
+                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 2)]))
+             (not= :moving
+                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 2)]))))))
+
+(defn rotate-ccw
+  []
+  (defn permute-units
+    [positions]
+    (var aux (get-in piece (first positions)))
+    (loop [i :range [0 (dec (length positions))]]
+      (put-in piece (get positions i)
+              (get-in piece (get positions (inc i)))))
+    (put-in piece (last positions) aux))
+  #
+  (permute-units [[0 0] [3 0] [3 3] [0 3]])
+  (permute-units [[1 0] [3 1] [2 3] [0 2]])
+  (permute-units [[2 0] [3 2] [1 3] [0 1]])
+  (permute-units [[1 1] [2 1] [2 2] [1 2]]))
 
 (defn resolve-turn-move
   []
   (when (j/key-down? :w)
-    (var aux nil)
-    (var checker false)
-    # check whether rotation is not possible
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 3) piece-pos-y]))
-               (not= :empty
-                     (get-in grid
-                             [piece-pos-x piece-pos-y]))
-               (not= :moving
-                     (get-in grid
-                             [piece-pos-x piece-pos-y])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 3) (+ piece-pos-y 3)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 3) piece-pos-y]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 3) piece-pos-y])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [piece-pos-x (+ piece-pos-y 3)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 3) (+ piece-pos-y 3)]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 3) (+ piece-pos-y 3)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [piece-pos-x piece-pos-y]))
-               (not= :empty
-                     (get-in grid
-                             [piece-pos-x (+ piece-pos-y 3)]))
-               (not= :moving
-                     (get-in grid
-                             [piece-pos-x (+ piece-pos-y 3)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 1) piece-pos-y]))
-               (not= :empty
-                     (get-in grid
-                             [piece-pos-x (+ piece-pos-y 2)]))
-               (not= :moving
-                     (get-in grid
-                             [piece-pos-x (+ piece-pos-y 2)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 3) (+ piece-pos-y 1)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 1) piece-pos-y]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 1) piece-pos-y])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 2) (+ piece-pos-y 3)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 3) (+ piece-pos-y 1)]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 3) (+ piece-pos-y 1)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [piece-pos-x (+ piece-pos-y 2)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 2) (+ piece-pos-y 3)]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 2) (+ piece-pos-y 3)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 2) piece-pos-y]))
-               (not= :empty
-                     (get-in grid
-                             [piece-pos-x (+ piece-pos-y 1)]))
-               (not= :moving
-                     (get-in grid
-                             [piece-pos-x (+ piece-pos-y 1)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 3) (+ piece-pos-y 2)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 2) piece-pos-y]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 2) piece-pos-y])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 1) (+ piece-pos-y 3)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 3) (+ piece-pos-y 2)]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 3) (+ piece-pos-y 2)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [piece-pos-x (+ piece-pos-y 1)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 1) (+ piece-pos-y 3)]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 1) (+ piece-pos-y 3)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 1) (+ piece-pos-y 1)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 1) (+ piece-pos-y 2)]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 1) (+ piece-pos-y 2)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 2) (+ piece-pos-y 1)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 1) (+ piece-pos-y 1)]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 1) (+ piece-pos-y 1)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 2) (+ piece-pos-y 2)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 2) (+ piece-pos-y 1)]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 2) (+ piece-pos-y 1)])))
-      (set checker true))
-    (when (and (= :moving
-                  (get-in grid
-                          [(+ piece-pos-x 1) (+ piece-pos-y 2)]))
-               (not= :empty
-                     (get-in grid
-                             [(+ piece-pos-x 2) (+ piece-pos-y 2)]))
-               (not= :moving
-                     (get-in grid
-                             [(+ piece-pos-x 2) (+ piece-pos-y 2)])))
-      (set checker true))
     # rotate piece counterclockwise if appropriate
-    (when (not checker)
-      (permute-units [[0 0] [3 0] [3 3] [0 3]])
-      (permute-units [[1 0] [3 1] [2 3] [0 2]])
-      (permute-units [[2 0] [3 2] [1 3] [0 1]])
-      (permute-units [[1 1] [2 1] [2 2] [1 2]]))
+    (when (can-rotate?)
+      (rotate-ccw))
     # clear grid spots occupied that were occupied by piece
     (loop [j :down-to [(- grid-y-size 2) 0]
            i :range [1 (dec grid-x-size)]
