@@ -122,47 +122,26 @@
   #
   (case random
     0
-    (do
-      (put-in incoming-piece [1 1] :moving)
-      (put-in incoming-piece [2 1] :moving)
-      (put-in incoming-piece [1 2] :moving)
-      (put-in incoming-piece [2 2] :moving))
+    (each u [[1 1] [2 1] [1 2] [2 2]]    # O
+      (put-in incoming-piece u :moving))
     1
-    (do
-      (put-in incoming-piece [1 0] :moving)
-      (put-in incoming-piece [1 1] :moving)
-      (put-in incoming-piece [1 2] :moving)
-      (put-in incoming-piece [2 2] :moving))
+    (each u [[1 0] [1 1] [1 2] [2 2]]    # L
+      (put-in incoming-piece u :moving))
     2
-    (do
-      (put-in incoming-piece [1 2] :moving)
-      (put-in incoming-piece [2 0] :moving)
-      (put-in incoming-piece [2 1] :moving)
-      (put-in incoming-piece [2 2] :moving))
+    (each u [[1 2] [2 0] [2 1] [2 2]]    # J
+      (put-in incoming-piece u :moving))
     3
-    (do
-      (put-in incoming-piece [0 1] :moving)
-      (put-in incoming-piece [1 1] :moving)
-      (put-in incoming-piece [2 1] :moving)
-      (put-in incoming-piece [3 1] :moving))
+    (each u [[0 1] [1 1] [2 1] [3 1]]    # I
+      (put-in incoming-piece u :moving))
     4
-    (do
-      (put-in incoming-piece [1 0] :moving)
-      (put-in incoming-piece [1 1] :moving)
-      (put-in incoming-piece [1 2] :moving)
-      (put-in incoming-piece [2 1] :moving))
+    (each u [[1 0] [1 1] [1 2] [2 1]]    # T
+      (put-in incoming-piece u :moving))
     5
-    (do
-      (put-in incoming-piece [1 1] :moving)
-      (put-in incoming-piece [2 1] :moving)
-      (put-in incoming-piece [2 2] :moving)
-      (put-in incoming-piece [3 2] :moving))
+    (each u [[1 1] [2 1] [2 2] [3 2]]    # Z
+      (put-in incoming-piece u :moving))
     6
-    (do
-      (put-in incoming-piece [1 2] :moving)
-      (put-in incoming-piece [2 2] :moving)
-      (put-in incoming-piece [2 1] :moving)
-      (put-in incoming-piece [3 1] :moving))))
+    (each u [[1 2] [2 2] [2 1] [3 1]]    # S
+      (put-in incoming-piece u :moving))))
 
 (defn create-piece
   []
@@ -175,18 +154,18 @@
     (get-random-piece)
     (set begin-play false))
   # copy newly obtained incoming-piece to piece
-  (for i 0 piece-dim
-    (for j 0 piece-dim
-      (put-in piece [i j]
-              (get-in incoming-piece [i j]))))
+  (loop [i :range [0 piece-dim]
+         j :range [0 piece-dim]]
+    (put-in piece [i j]
+            (get-in incoming-piece [i j])))
   # get another incoming piece
   (get-random-piece)
   # put the piece in the grid
-  (for i piece-position-x (+ piece-position-x 4)
-    (for j 0 piece-dim
-      (when (= :moving
-               (get-in piece [(- i piece-position-x) j]))
-        (put-in grid [i j] :moving))))
+  (loop [i :range [piece-position-x (+ piece-position-x 4)]
+         j :range [0 piece-dim]
+         :when (= :moving
+                  (get-in piece [(- i piece-position-x) j]))]
+    (put-in grid [i j] :moving))
   #
   true)
 
