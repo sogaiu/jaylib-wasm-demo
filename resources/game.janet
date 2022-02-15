@@ -82,6 +82,52 @@
 
 ###########################################################################
 
+(defn init-grid
+  [a-grid]
+  (loop [i :range [0 grid-x-size]
+         :before (put a-grid i (array/new grid-y-size))
+         j :range [0 grid-y-size]]
+    (if (or (= i 0)
+            (= i (dec grid-x-size))
+            (= j (dec grid-y-size)))
+      # pre-fill left, right, and bottom edges of the grid
+      (put-in a-grid [i j] :block)
+      # all other spots are :empty
+      (put-in a-grid [i j] :empty)))
+  a-grid)
+
+(defn init-piece
+  [a-piece]
+  # mark all spots in a-piece :empty
+  (loop [i :range [0 piece-dim]
+         :before (put a-piece i (array/new piece-dim))
+         j :range [0 grid-x-size]]
+    (put-in a-piece [i j] :empty))
+  a-piece)
+
+(defn init-game
+  [state]
+  (set piece-pos-x 0)
+  (set piece-pos-y 0)
+  (set grid (init-grid grid))
+  (set future-piece (init-piece future-piece))
+  (put state :game-over false)
+  (put state :pause false)
+  (put state :begin-play true)
+  (put state :piece-active false)
+  (put state :fading-color :gray)
+  # whether any lines need to be deleted
+  (put state :line-to-delete false)
+  # number of lines deleted so far
+  (put state :lines 0)
+  (put state :detection false)
+  (put state :gravity-move-counter 0)
+  (put state :lateral-move-counter 0)
+  (put state :turn-move-counter 0)
+  (put state :fast-fall-move-counter 0)
+  (put state :fade-line-counter 0)
+  state)
+
 (defn get-random-piece
   []
   # empty out future-piece
@@ -361,52 +407,6 @@
           (-> grid
               (put-in [i2 (inc j2)] :fading)
               (put-in [i2 j2] :empty)))))))
-
-(defn init-grid
-  [a-grid]
-  (loop [i :range [0 grid-x-size]
-         :before (put a-grid i (array/new grid-y-size))
-         j :range [0 grid-y-size]]
-    (if (or (= i 0)
-            (= i (dec grid-x-size))
-            (= j (dec grid-y-size)))
-      # pre-fill left, right, and bottom edges of the grid
-      (put-in a-grid [i j] :block)
-      # all other spots are :empty
-      (put-in a-grid [i j] :empty)))
-  a-grid)
-
-(defn init-piece
-  [a-piece]
-  # mark all spots in a-piece :empty
-  (loop [i :range [0 piece-dim]
-         :before (put a-piece i (array/new piece-dim))
-         j :range [0 grid-x-size]]
-    (put-in a-piece [i j] :empty))
-  a-piece)
-
-(defn init-game
-  [state]
-  (set piece-pos-x 0)
-  (set piece-pos-y 0)
-  (set grid (init-grid grid))
-  (set future-piece (init-piece future-piece))
-  (put state :game-over false)
-  (put state :pause false)
-  (put state :begin-play true)
-  (put state :piece-active false)
-  (put state :fading-color :gray)
-  # whether any lines need to be deleted
-  (put state :line-to-delete false)
-  # number of lines deleted so far
-  (put state :lines 0)
-  (put state :detection false)
-  (put state :gravity-move-counter 0)
-  (put state :lateral-move-counter 0)
-  (put state :turn-move-counter 0)
-  (put state :fast-fall-move-counter 0)
-  (put state :fade-line-counter 0)
-  state)
 
 (defn toggle-mute
   []
