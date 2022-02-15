@@ -38,8 +38,6 @@
 
 (var screen-height 450)
 
-(var pause false)
-
 # 2-d array with dimensions grid-x-size x grid-y-size
 #
 # possibly values include:
@@ -417,7 +415,6 @@
   (set fading-color :gray)
   (set piece-pos-x 0)
   (set piece-pos-y 0)
-  (set pause false)
   (set begin-play true)
   (set piece-active false)
   (set detection false)
@@ -431,6 +428,7 @@
   (set grid (init-grid grid))
   (set future-piece (init-piece future-piece))
   (put state :game-over false)
+  (put state :pause false)
   state)
 
 (defn toggle-mute
@@ -441,11 +439,12 @@
   (j/set-music-volume bgm bgm-volume))
 
 (defn toggle-pause
-  []
-  (set pause (not pause))
-  (if pause
+  [state]
+  (put state :pause (not (state :pause)))
+  (if (state :pause)
     (j/pause-music-stream bgm)
-    (j/resume-music-stream bgm)))
+    (j/resume-music-stream bgm))
+  state)
 
 (defn handle-line-deletion
   []
@@ -519,9 +518,9 @@
     (toggle-mute))
   #
   (when (j/key-pressed? :p)
-    (toggle-pause))
+    (toggle-pause state))
   #
-  (when pause
+  (when (state :pause)
     (break state))
   #
   (when line-to-delete
@@ -666,7 +665,7 @@
       (draw-grid)
       (draw-info-box 500 45) # XXX: hard-coded
       # show pause overlay when appropriate
-      (when pause
+      (when (state :pause)
         (draw-pause-overlay))))
   #
   (j/end-drawing)
