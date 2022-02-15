@@ -429,6 +429,18 @@
     (j/pause-music-stream bgm)
     (j/resume-music-stream bgm)))
 
+(defn handle-line-deletion
+  []
+  (++ fade-line-counter)
+  (if (< (% fade-line-counter 8) 4)
+    (set fading-color :maroon)
+    (set fading-color :gray))
+  (when (>= fade-line-counter fading-time)
+    (delete-complete-lines)
+    (set fade-line-counter 0)
+    (set line-to-delete false)
+    (++ lines)))
+
 (defn handle-active-piece
   []
   (++ fast-fall-move-counter)
@@ -463,17 +475,18 @@
     (when (resolve-turn-move)
       (set turn-move-counter 0))))
 
-(defn handle-line-deletion
+(defn init-active-piece
   []
-  (++ fade-line-counter)
-  (if (< (% fade-line-counter 8) 4)
-    (set fading-color :maroon)
-    (set fading-color :gray))
-  (when (>= fade-line-counter fading-time)
-    (delete-complete-lines)
-    (set fade-line-counter 0)
-    (set line-to-delete false)
-    (++ lines)))
+  (set piece-active (create-piece))
+  (set fast-fall-move-counter 0))
+
+(defn check-game-over
+  []
+  (loop [j :range [0 2] # XXX: 2?
+         i :range [1 (dec grid-x-size)]
+         :when (= :full
+                  (get-in grid [i j]))]
+    (set game-over true)))
 
 (defn update-game
   []
@@ -498,15 +511,9 @@
   #
   (if piece-active
     (handle-active-piece)
-    (do # piece not moving
-      (set piece-active (create-piece))
-      (set fast-fall-move-counter 0)))
+    (init-active-piece))
   # game over?
-  (loop [j :range [0 2] # XXX: 2?
-         i :range [1 (dec grid-x-size)]
-         :when (= :full
-                  (get-in grid [i j]))]
-    (set game-over true)))
+  (check-game-over))
 
 (defn draw-grid
   []
