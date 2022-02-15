@@ -59,9 +59,6 @@
 # :moving - spot is part of piece
 (var piece @[])
 
-# same structure and content as piece
-(var future-piece @[])
-
 # x-coordinate of top-left of "piece grid"
 #
 # "piece grid" is a piece-dim x piece-dim square of spots within the
@@ -97,7 +94,8 @@
   a-grid)
 
 (defn init-piece
-  [a-piece]
+  []
+  (def a-piece @[])
   # mark all spots in a-piece :empty
   (loop [i :range [0 piece-dim]
          :before (put a-piece i (array/new piece-dim))
@@ -110,7 +108,8 @@
   (set piece-pos-x 0)
   (set piece-pos-y 0)
   (set grid (init-grid grid))
-  (set future-piece (init-piece future-piece))
+  # same structure and content as piece
+  (put state :future-piece (init-piece))
   (put state :game-over false)
   (put state :pause false)
   (put state :begin-play true)
@@ -129,11 +128,11 @@
   state)
 
 (defn get-random-piece
-  []
+  [state]
   # empty out future-piece
   (loop [i :range [0 piece-dim]
          j :range [0 piece-dim]]
-    (put-in future-piece [i j] :empty))
+    (put-in state [:future-piece i j] :empty))
   #
   (def pieces
     [[[1 1] [2 1] [1 2] [2 2]]   # O
@@ -148,7 +147,9 @@
   (loop [a-unit :in (get pieces
                          (math/rng-int an-rng
                                        (+ (dec (length pieces)) 1)))]
-    (put-in future-piece a-unit :moving)))
+    (put-in state [:future-piece ;a-unit] :moving))
+  #
+  state)
 
 (defn create-piece
   [state]
@@ -158,15 +159,15 @@
   (set piece-pos-y 0)
   # create extra piece this one time
   (when (state :begin-play)
-    (get-random-piece)
+    (get-random-piece state)
     (put state :begin-play false))
   # copy newly obtained future-piece to piece
   (loop [i :range [0 piece-dim]
          j :range [0 piece-dim]]
     (put-in piece [i j]
-            (get-in future-piece [i j])))
+            (get-in state [:future-piece i j])))
   # get another future piece
-  (get-random-piece)
+  (get-random-piece state)
   # put the piece in the grid
   (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
          j :range [0 piece-dim]
@@ -581,7 +582,7 @@
   # draw future piece
   (for j 0 piece-dim
     (for i 0 piece-dim
-      (case (get-in future-piece [i j])
+      (case (get-in state [:future-piece i j])
         :empty
         (do
           (j/draw-line offset-x offset-y
