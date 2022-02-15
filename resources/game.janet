@@ -72,8 +72,6 @@
 # y-coordinate of top-left of "piece grid"
 (var piece-pos-y 0)
 
-(var fading-color nil)
-
 (var detection false)
 
 # whether any lines need to be deleted
@@ -409,7 +407,6 @@
   [state]
   (set level 1)
   (set lines 0)
-  (set fading-color :gray)
   (set piece-pos-x 0)
   (set piece-pos-y 0)
   (set detection false)
@@ -426,6 +423,7 @@
   (put state :pause false)
   (put state :begin-play true)
   (put state :piece-active false)
+  (put state :fading-color :gray)
   state)
 
 (defn toggle-mute
@@ -444,16 +442,18 @@
   state)
 
 (defn handle-line-deletion
-  []
+  [state]
   (++ fade-line-counter)
   (if (< (% fade-line-counter 8) 4)
-    (set fading-color :maroon)
-    (set fading-color :gray))
+    (put state :fading-color :maroon)
+    (put state :fading-color :gray))
   (when (>= fade-line-counter fading-time)
     (delete-complete-lines)
     (set fade-line-counter 0)
     (set line-to-delete false)
-    (++ lines)))
+    (++ lines))
+  #
+  state)
 
 (defn handle-active-piece
   [state]
@@ -525,7 +525,7 @@
     (break state))
   #
   (when line-to-delete
-    (handle-line-deletion)
+    (handle-line-deletion state)
     (break state))
   #
   (if (state :piece-active)
@@ -536,7 +536,7 @@
   state)
 
 (defn draw-grid
-  []
+  [state]
   (var offset-x
     (- (/ screen-width 2)
        (* grid-x-size (/ square-size 2))
@@ -580,13 +580,16 @@
         #
         :fading
         (j/draw-rectangle offset-x offset-y
-                          square-size square-size fading-color)
+                          square-size square-size
+                          (state :fading-color))
         #
         (eprintf "Unexpected value: %p at %p, %p"
                  (get-in grid [i j]) i j))
       (+= offset-x square-size))
     (set offset-x controller)
-    (+= offset-y square-size)))
+    (+= offset-y square-size))
+  #
+  state)
 
 (defn draw-info-box
   [x y]
@@ -663,7 +666,7 @@
   (if (state :game-over)
     (draw-play-again-overlay)
     (do
-      (draw-grid)
+      (draw-grid state)
       (draw-info-box 500 45) # XXX: hard-coded
       # show pause overlay when appropriate
       (when (state :pause)
