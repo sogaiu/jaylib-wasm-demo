@@ -72,10 +72,6 @@
 # y-coordinate of top-left of "piece grid"
 (var piece-pos-y 0)
 
-(var fast-fall-move-counter 0)
-
-(var fade-line-counter 0)
-
 (var gravity-speed 30)
 
 ###########################################################################
@@ -393,8 +389,6 @@
   [state]
   (set piece-pos-x 0)
   (set piece-pos-y 0)
-  (set fast-fall-move-counter 0)
-  (set fade-line-counter 0)
   (set gravity-speed 30)
   (set grid (init-grid grid))
   (set future-piece (init-piece future-piece))
@@ -411,6 +405,8 @@
   (put state :gravity-move-counter 0)
   (put state :lateral-move-counter 0)
   (put state :turn-move-counter 0)
+  (put state :fast-fall-move-counter 0)
+  (put state :fade-line-counter 0)
   state)
 
 (defn toggle-mute
@@ -430,13 +426,13 @@
 
 (defn handle-line-deletion
   [state]
-  (++ fade-line-counter)
-  (if (< (% fade-line-counter 8) 4)
+  (++ (state :fade-line-counter))
+  (if (< (% (state :fade-line-counter) 8) 4)
     (put state :fading-color :maroon)
     (put state :fading-color :gray))
-  (when (>= fade-line-counter fading-time)
+  (when (>= (state :fade-line-counter) fading-time)
     (delete-complete-lines)
-    (set fade-line-counter 0)
+    (put state :fade-line-counter 0)
     (put state :line-to-delete false)
     (++ (state :lines)))
   #
@@ -444,7 +440,7 @@
 
 (defn handle-active-piece
   [state]
-  (++ fast-fall-move-counter)
+  (++ (state :fast-fall-move-counter))
   (++ (state :gravity-move-counter))
   (++ (state :lateral-move-counter))
   (++ (state :turn-move-counter))
@@ -456,7 +452,7 @@
     (put state :turn-move-counter turning-speed))
   # fall?
   (when (and (j/key-down? :s)
-             (>= fast-fall-move-counter
+             (>= (state :fast-fall-move-counter)
                  fast-fall-await-counter))
     (+= (state :gravity-move-counter) gravity-speed))
   (when (>= (state :gravity-move-counter) gravity-speed)
@@ -482,7 +478,7 @@
   [state]
   (create-piece state)
   (put state :piece-active true)
-  (set fast-fall-move-counter 0)
+  (put state :fast-fall-move-counter 0)
   state)
 
 (defn check-game-over
