@@ -477,31 +477,36 @@
 
 (defn update-game
   []
-  (if game-over
+  (when game-over
     (when (j/key-pressed? :enter)
       (init-game)
       (set game-over false))
-    (do
-      (when (j/key-pressed? :m)
-        (toggle-mute))
-      (when (j/key-pressed? :p)
-        (toggle-pause))
-      #
-      (when (not pause)
-        (if line-to-delete
-          (handle-line-deletion)
-          (do
-            (if piece-active
-              (handle-active-piece)
-              (do # piece not moving
-                (set piece-active (create-piece))
-                (set fast-fall-move-counter 0)))
-            # game over?
-            (loop [j :range [0 2] # XXX: 2?
-                   i :range [1 (dec grid-x-size)]
-                   :when (= :full
-                            (get-in grid [i j]))]
-              (set game-over true))))))))
+    (break))
+  #
+  (when (j/key-pressed? :m)
+    (toggle-mute))
+  #
+  (when (j/key-pressed? :p)
+    (toggle-pause))
+  #
+  (when pause
+    (break))
+  #
+  (when line-to-delete
+    (handle-line-deletion)
+    (break))
+  #
+  (if piece-active
+    (handle-active-piece)
+    (do # piece not moving
+      (set piece-active (create-piece))
+      (set fast-fall-move-counter 0)))
+  # game over?
+  (loop [j :range [0 2] # XXX: 2?
+         i :range [1 (dec grid-x-size)]
+         :when (= :full
+                  (get-in grid [i j]))]
+    (set game-over true)))
 
 (defn draw-grid
   []
