@@ -51,14 +51,6 @@
 # :fading - about to be deleted / cleared
 (var grid @[])
 
-# 2-d array with dimensions piece-dim x piece-dim
-#
-# possible values include:
-#
-# :empty  - spot is empty
-# :moving - spot is part of piece
-(var piece @[])
-
 ###########################################################################
 
 (var bgm nil)
@@ -104,6 +96,13 @@
   # y-coordinate of top-left of "piece grid"
   (put state :piece-pos-y 0)
   (set grid (init-grid grid))
+  # 2-d array with dimensions piece-dim x piece-dim
+  #
+  # possible values include:
+  #
+  # :empty  - spot is empty
+  # :moving - spot is part of piece
+  (put state :piece @[])
   # same structure and content as piece
   (put state :future-piece (init-piece))
   (put state :game-over false)
@@ -162,7 +161,7 @@
   # copy newly obtained future-piece to piece
   (loop [i :range [0 piece-dim]
          j :range [0 piece-dim]]
-    (put-in piece [i j]
+    (put-in state [:piece i j]
             (get-in state [:future-piece i j])))
   # get another future piece
   (get-random-piece state)
@@ -171,7 +170,7 @@
   (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
          j :range [0 piece-dim]
          :when (= :moving
-                  (get-in piece [(- i piece-pos-x) j]))]
+                  (get-in state [:piece (- i piece-pos-x) j]))]
     (put-in grid [i j] :moving))
   #
   state)
@@ -322,14 +321,15 @@
   state)
 
 (defn rotate-ccw
-  []
+  [state]
   (defn left-rotate-units
     [positions]
-    (var aux (get-in piece (first positions)))
+    (var aux
+      (get-in state [:piece ;(first positions)]))
     (loop [i :range [0 (dec (length positions))]]
-      (put-in piece (get positions i)
-              (get-in piece (get positions (inc i)))))
-    (put-in piece (last positions) aux))
+      (put-in state [:piece ;(get positions i)]
+              (get-in state [:piece ;(get positions (inc i))])))
+    (put-in state [:piece ;(last positions)] aux))
   #
   (left-rotate-units [[0 0] [3 0] [3 3] [0 3]])
   (left-rotate-units [[1 0] [3 1] [2 3] [0 2]])
@@ -343,7 +343,7 @@
   (when (j/key-down? :w)
     # rotate piece counterclockwise if appropriate
     (when ((can-rotate? state) :result)
-      (rotate-ccw))
+      (rotate-ccw state))
     # clear grid spots occupied that were occupied by piece
     (loop [j :down-to [(- grid-y-size 2) 0]
            i :range [1 (dec grid-x-size)]
@@ -356,8 +356,8 @@
     (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
            j :range [piece-pos-y (+ piece-pos-y 4)]
            :when (= :moving
-                    (get-in piece
-                            [(- i piece-pos-x) (- j piece-pos-y)]))]
+                    (get-in state
+                            [:piece (- i piece-pos-x) (- j piece-pos-y)]))]
       (put-in grid [i j] :moving))
     #
     (set result true))
