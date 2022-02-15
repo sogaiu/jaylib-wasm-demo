@@ -74,12 +74,6 @@
 
 (var detection false)
 
-# whether any lines need to be deleted
-(var line-to-delete false)
-
-# number of lines deleted so far
-(var lines 0)
-
 (var gravity-move-counter 0)
 
 (var lateral-move-counter 0)
@@ -335,7 +329,7 @@
     (set detection true)))
 
 (defn check-completion
-  []
+  [state]
   (var calculator 0)
   # determine if any lines need to be deleted
   (loop [j :down-to [(- grid-y-size 2) 0]]
@@ -349,10 +343,11 @@
       # that at least one line needs to be deleted
       (when (= (- grid-x-size 2)
                calculator)
-        (set line-to-delete true)
+        (put state :line-to-delete true)
         (set calculator 0)
         (loop [z :range [1 (dec grid-x-size)]]
-          (put-in grid [z j] :fading))))))
+          (put-in grid [z j] :fading)))))
+  state)
 
 (defn delete-complete-lines
   []
@@ -403,11 +398,9 @@
 
 (defn init-game
   [state]
-  (set lines 0)
   (set piece-pos-x 0)
   (set piece-pos-y 0)
   (set detection false)
-  (set line-to-delete false)
   (set gravity-move-counter 0)
   (set lateral-move-counter 0)
   (set turn-move-counter 0)
@@ -421,6 +414,10 @@
   (put state :begin-play true)
   (put state :piece-active false)
   (put state :fading-color :gray)
+  # whether any lines need to be deleted
+  (put state :line-to-delete false)
+  # number of lines deleted so far
+  (put state :lines 0)
   state)
 
 (defn toggle-mute
@@ -447,8 +444,8 @@
   (when (>= fade-line-counter fading-time)
     (delete-complete-lines)
     (set fade-line-counter 0)
-    (set line-to-delete false)
-    (++ lines))
+    (put state :line-to-delete false)
+    (++ (state :lines)))
   #
   state)
 
@@ -475,7 +472,7 @@
     # collision?
     (resolve-falling-move state)
     # any lines completed?
-    (check-completion)
+    (check-completion state)
     (set gravity-move-counter 0))
   # sideways move
   (when (>= lateral-move-counter lateral-speed)
@@ -521,7 +518,7 @@
   (when (state :pause)
     (break state))
   #
-  (when line-to-delete
+  (when (state :line-to-delete)
     (handle-line-deletion state)
     (break state))
   #
@@ -589,7 +586,7 @@
   state)
 
 (defn draw-info-box
-  [x y]
+  [state x y]
   (var offset-x x)
   (var offset-y y)
   (var controller offset-x)
@@ -625,9 +622,10 @@
                offset-x (- offset-y 100)
                10 :gray)
   # show how many lines completed so far
-  (j/draw-text (string/format "LINES:      %04i" lines)
+  (j/draw-text (string/format "LINES:      %04i" (state :lines))
                offset-x (+ offset-y 20)
                10 :gray)
+  # XXX: or return state or?
   [offset-x offset-y])
 
 (defn draw-pause-overlay
@@ -664,7 +662,7 @@
     (draw-play-again-overlay)
     (do
       (draw-grid state)
-      (draw-info-box 500 45) # XXX: hard-coded
+      (draw-info-box state 500 45) # XXX: hard-coded
       # show pause overlay when appropriate
       (when (state :pause)
         (draw-pause-overlay))))
