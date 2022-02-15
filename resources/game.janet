@@ -292,7 +292,7 @@
 
 (defn rotate-ccw
   []
-  (defn permute-units
+  (defn left-rotate-units
     [positions]
     (var aux (get-in piece (first positions)))
     (loop [i :range [0 (dec (length positions))]]
@@ -300,10 +300,10 @@
               (get-in piece (get positions (inc i)))))
     (put-in piece (last positions) aux))
   #
-  (permute-units [[0 0] [3 0] [3 3] [0 3]])
-  (permute-units [[1 0] [3 1] [2 3] [0 2]])
-  (permute-units [[2 0] [3 2] [1 3] [0 1]])
-  (permute-units [[1 1] [2 1] [2 2] [1 2]]))
+  (left-rotate-units [[0 0] [3 0] [3 3] [0 3]])
+  (left-rotate-units [[1 0] [3 1] [2 3] [0 2]])
+  (left-rotate-units [[2 0] [3 2] [1 3] [0 1]])
+  (left-rotate-units [[1 1] [2 1] [2 2] [1 2]]))
 
 (defn resolve-turn-move
   []
