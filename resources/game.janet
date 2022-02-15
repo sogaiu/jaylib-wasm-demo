@@ -315,8 +315,8 @@
 
 (defn check-detection
   []
-  # check if spots below all of the spots occupied by a piece can be
-  # moved into (i.e. not :full and not :block)
+  # check if there is even one spot below the current line that a piece
+  # cannot be moved into (i.e. :full or :block)
   (loop [j :down-to [(- grid-y-size 2) 0]
          i :range [1 (dec grid-x-size)]
          :when (and (= :moving
@@ -467,7 +467,7 @@
     # any lines completed?
     (check-completion)
     (set gravity-move-counter 0))
-  # side ways move
+  # sideways move
   (when (>= lateral-move-counter lateral-speed)
     (when (not (resolve-lateral-move))
       (set lateral-move-counter 0)))
@@ -512,7 +512,7 @@
   (if piece-active
     (handle-active-piece)
     (init-active-piece))
-  # game over?
+  #
   (check-game-over))
 
 (defn draw-grid
