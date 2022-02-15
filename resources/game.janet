@@ -413,7 +413,8 @@
   (set fade-line-counter 0)
   (set gravity-speed 30)
   (set grid (init-grid grid))
-  (set future-piece (init-piece future-piece)))
+  (set future-piece (init-piece future-piece))
+  (set game-over false))
 
 (defn toggle-mute
   []
@@ -492,8 +493,7 @@
   []
   (when game-over
     (when (j/key-pressed? :enter)
-      (init-game)
-      (set game-over false))
+      (init-game))
     (break))
   #
   (when (j/key-pressed? :m)
