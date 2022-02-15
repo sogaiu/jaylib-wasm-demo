@@ -30,6 +30,8 @@
 
 (def fading-time 33)
 
+(def gravity-speed 30)
+
 ###########################################################################
 
 (var state @{})
@@ -71,8 +73,6 @@
 
 # y-coordinate of top-left of "piece grid"
 (var piece-pos-y 0)
-
-(var gravity-speed 30)
 
 ###########################################################################
 
@@ -389,7 +389,6 @@
   [state]
   (set piece-pos-x 0)
   (set piece-pos-y 0)
-  (set gravity-speed 30)
   (set grid (init-grid grid))
   (set future-piece (init-piece future-piece))
   (put state :game-over false)
