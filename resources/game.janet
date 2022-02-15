@@ -42,12 +42,6 @@
 
 ###########################################################################
 
-(var bgm nil)
-
-(var bgm-volume 0.5)
-
-###########################################################################
-
 (defn init-grid
   []
   (def a-grid @[])
@@ -119,6 +113,9 @@
   (put state :turn-move-counter 0)
   (put state :fast-fall-move-counter 0)
   (put state :fade-line-counter 0)
+  #
+  (put state :bgm nil)
+  (put state :bgm-volume 0.5)
   # XXX: hack for retrieving result of function invocation
   (put state :result nil)
   state)
@@ -448,19 +445,21 @@
   #
   state)
 
-(defn toggle-mute
-  []
-  (if (zero? bgm-volume)
-    (set bgm-volume 0.5)
-    (set bgm-volume 0))
-  (j/set-music-volume bgm bgm-volume))
+(defn toggle-mute!
+  [state]
+  (if (zero? (state :bgm-volume))
+    (put state :bgm-volume 0.5)
+    (put state :bgm-volume 0))
+  (j/set-music-volume (state :bgm) (state :bgm-volume))
+  #
+  state)
 
 (defn toggle-pause!
   [state]
   (put state :pause (not (state :pause)))
   (if (state :pause)
-    (j/pause-music-stream bgm)
-    (j/resume-music-stream bgm))
+    (j/pause-music-stream (state :bgm))
+    (j/resume-music-stream (state :bgm)))
   #
   state)
 
@@ -542,7 +541,7 @@
     (break state))
   #
   (when (j/key-pressed? :m)
-    (toggle-mute))
+    (toggle-mute! state))
   #
   (when (j/key-pressed? :p)
     (toggle-pause! state))
@@ -715,8 +714,8 @@
               (d :hours) (d :minutes) (d :seconds) (dyn :frame))))
   (setdyn :frame (inc (dyn :frame)))
   #
-  (when bgm
-    (j/update-music-stream bgm))
+  (when (state :bgm)
+    (j/update-music-stream (state :bgm)))
   #
   (-> state
       update-game!
@@ -731,12 +730,12 @@
 # happen
 (j/init-window screen-width screen-height "Jaylib Demo")
 
-(j/init-audio-device)
-(set bgm (j/load-music-stream "resources/theme.ogg"))
-(j/play-music-stream bgm)
-(j/set-music-volume bgm bgm-volume)
-
 (init-game! state)
+
+(j/init-audio-device)
+(put state :bgm (j/load-music-stream "resources/theme.ogg"))
+(j/play-music-stream (state :bgm))
+(j/set-music-volume (state :bgm) (state :bgm-volume))
 
 # to facilitate calling from main.c
 (defn update-draw-frame
