@@ -72,8 +72,6 @@
 # y-coordinate of top-left of "piece grid"
 (var piece-pos-y 0)
 
-(var detection false)
-
 (var gravity-move-counter 0)
 
 (var lateral-move-counter 0)
@@ -144,14 +142,14 @@
 
 (defn resolve-falling-move
   [state]
-  (if detection
+  (if (state :detection)
     # stop the piece
     (loop [j :down-to [(- grid-y-size 2) 0]
            i :range [1 (dec grid-x-size)]
            :when (= :moving
                     (get-in grid [i j]))]
       (put-in grid [i j] :full)
-      (set detection false)
+      (put state :detection false)
       (put state :piece-active false))
     # move the piece down
     (do
@@ -315,7 +313,7 @@
   false)
 
 (defn check-detection
-  []
+  [state]
   # check if there is even one spot below the current line that a piece
   # cannot be moved into (i.e. :full or :block)
   (loop [j :down-to [(- grid-y-size 2) 0]
@@ -326,7 +324,8 @@
                            (get-in grid [i (inc j)]))
                         (= :block
                            (get-in grid [i (inc j)]))))]
-    (set detection true)))
+    (put state :detection true))
+  state)
 
 (defn check-completion
   [state]
@@ -400,7 +399,6 @@
   [state]
   (set piece-pos-x 0)
   (set piece-pos-y 0)
-  (set detection false)
   (set gravity-move-counter 0)
   (set lateral-move-counter 0)
   (set turn-move-counter 0)
@@ -418,6 +416,7 @@
   (put state :line-to-delete false)
   # number of lines deleted so far
   (put state :lines 0)
+  (put state :detection false)
   state)
 
 (defn toggle-mute
@@ -468,7 +467,7 @@
     (+= gravity-move-counter gravity-speed))
   (when (>= gravity-move-counter gravity-speed)
     # falling
-    (check-detection)
+    (check-detection state)
     # collision?
     (resolve-falling-move state)
     # any lines completed?
