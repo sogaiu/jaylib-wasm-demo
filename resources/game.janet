@@ -72,10 +72,6 @@
 # y-coordinate of top-left of "piece grid"
 (var piece-pos-y 0)
 
-(var gravity-move-counter 0)
-
-(var lateral-move-counter 0)
-
 (var turn-move-counter 0)
 
 (var fast-fall-move-counter 0)
@@ -399,8 +395,6 @@
   [state]
   (set piece-pos-x 0)
   (set piece-pos-y 0)
-  (set gravity-move-counter 0)
-  (set lateral-move-counter 0)
   (set turn-move-counter 0)
   (set fast-fall-move-counter 0)
   (set fade-line-counter 0)
@@ -417,6 +411,8 @@
   # number of lines deleted so far
   (put state :lines 0)
   (put state :detection false)
+  (put state :gravity-move-counter 0)
+  (put state :lateral-move-counter 0)
   state)
 
 (defn toggle-mute
@@ -451,32 +447,32 @@
 (defn handle-active-piece
   [state]
   (++ fast-fall-move-counter)
-  (++ gravity-move-counter)
-  (++ lateral-move-counter)
+  (++ (state :gravity-move-counter))
+  (++ (state :lateral-move-counter))
   (++ turn-move-counter)
   # arrange for move if necessary
   (when (or (j/key-pressed? :a)
             (j/key-pressed? :d))
-    (set lateral-move-counter lateral-speed))
+    (put state :lateral-move-counter lateral-speed))
   (when (j/key-pressed? :w)
     (set turn-move-counter turning-speed))
   # fall?
   (when (and (j/key-down? :s)
              (>= fast-fall-move-counter
                  fast-fall-await-counter))
-    (+= gravity-move-counter gravity-speed))
-  (when (>= gravity-move-counter gravity-speed)
+    (+= (state :gravity-move-counter) gravity-speed))
+  (when (>= (state :gravity-move-counter) gravity-speed)
     # falling
     (check-detection state)
     # collision?
     (resolve-falling-move state)
     # any lines completed?
     (check-completion state)
-    (set gravity-move-counter 0))
+    (put state :gravity-move-counter 0))
   # sideways move
-  (when (>= lateral-move-counter lateral-speed)
+  (when (>= (state :lateral-move-counter) lateral-speed)
     (when (not (resolve-lateral-move))
-      (set lateral-move-counter 0)))
+      (put state :lateral-move-counter 0)))
   # turning
   (when (>= turn-move-counter turning-speed)
     (when (resolve-turn-move)
