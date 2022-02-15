@@ -180,57 +180,73 @@
             (put-in [i j] :empty)))
       (++ piece-pos-y))))
 
-(defn resolve-lateral-move
+(defn left-blocked?
   []
   (var collision false)
-  #
+  (loop [j :down-to [(- grid-y-size 2) 0]
+         i :range [1 (dec grid-x-size)]
+         :when (and (= :moving
+                       (get-in grid [i j]))
+                    (or (zero? (dec i))
+                        (= :full
+                           (get-in grid [(dec i) j]))))]
+    (set collision true)
+    (break))
+  collision)
+
+(defn move-left
+  []
+  (loop [j :down-to [(- grid-y-size 2) 0]
+         i :range [1 (dec grid-x-size)]
+         :when (= :moving
+                  (get-in grid [i j]))]
+    (-> grid
+        (put-in [(dec i) j] :moving)
+        (put-in  [i j] :empty)))
+  (-- piece-pos-x))
+
+(defn right-blocked?
+  []
+  (var collision false)
+  (loop [j :down-to [(- grid-y-size 2) 0]
+         i :range [1 (dec grid-x-size)]
+         :when (and (= :moving
+                       (get-in grid [i j]))
+                    (or (= (inc i)
+                           (dec grid-x-size))
+                        (= :full
+                           (get-in grid [(inc i) j]))))]
+    (set collision true)
+    (break))
+  collision)
+
+(defn move-right
+  []
+  (loop [j :down-to [(- grid-y-size 2) 0]
+         i :down-to [(dec grid-x-size) 1]
+         :when (= :moving
+                  (get-in grid [i j]))]
+    (-> grid
+        (put-in [(inc i) j] :moving)
+        (put-in [i j] :empty)))
+  (++ piece-pos-x))
+
+(defn resolve-lateral-move
+  []
   (cond
     (j/key-down? :a)
-    (do
-      # determine if moving left is possible
-      (loop [j :down-to [(- grid-y-size 2) 0]
-             i :range [1 (dec grid-x-size)]
-             :when (and (= :moving
-                           (get-in grid [i j]))
-                        (or (zero? (dec i))
-                            (= :full
-                               (get-in grid [(dec i) j]))))]
-        (set collision true))
-      # move left if possible
-      (when (not collision)
-        (loop [j :down-to [(- grid-y-size 2) 0]
-               i :range [1 (dec grid-x-size)]
-               :when (= :moving
-                        (get-in grid [i j]))]
-          (-> grid
-              (put-in [(dec i) j] :moving)
-              (put-in  [i j] :empty)))
-        (-- piece-pos-x)))
+    # move left if possible
+    (when (not (left-blocked?))
+      (move-left)
+      (break false))
     #
     (j/key-down? :d)
-    (do
-      # determine if moving right is possible
-      (loop [j :down-to [(- grid-y-size 2) 0]
-             i :range [1 (dec grid-x-size)]
-             :when (and (= :moving
-                           (get-in grid [i j]))
-                        (or (= (inc i)
-                               (dec grid-x-size))
-                            (= :full
-                               (get-in grid [(inc i) j]))))]
-        (set collision true))
-      # move right if possible
-      (when (not collision)
-        (loop [j :down-to [(- grid-y-size 2) 0]
-               i :down-to [(dec grid-x-size) 1]
-               :when (= :moving
-                        (get-in grid [i j]))]
-          (-> grid
-              (put-in [(inc i) j] :moving)
-              (put-in [i j] :empty)))
-        (++ piece-pos-x))))
+    # move right if possible
+    (when (not (right-blocked?))
+      (move-right)
+      (break false)))
   #
-  collision)
+  true)
 
 (defn blocked?
   [src dst]
