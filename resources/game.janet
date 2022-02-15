@@ -416,6 +416,7 @@
 
 (defn delete-complete-lines!
   [state]
+  (var n-lines 0)
   # start at the bottom row (above the bottom :block row) and work way upward
   (loop [j :down-to [(- grid-y-size 2) 0]
          :let [grid (state :grid)]]
@@ -425,6 +426,8 @@
       # delete the current row by marking all spots in it :empty
       (loop [i :range [1 (dec grid-x-size)]]
         (put-in grid [i j] :empty))
+      # count each deleted line
+      (++ n-lines)
       # shift all rows above down by one appropriately
       (loop [j2 :down-to [(dec j) 0]
              i2 :range [1 (dec grid-x-size)]]
@@ -437,7 +440,11 @@
           :fading
           (-> grid
               (put-in [i2 (inc j2)] :fading)
-              (put-in [i2 j2] :empty)))))))
+              (put-in [i2 j2] :empty))))))
+  #
+  (put state :result n-lines)
+  #
+  state)
 
 (defn toggle-mute
   []
@@ -462,10 +469,11 @@
     (put state :fading-color :maroon)
     (put state :fading-color :gray))
   (when (>= (state :fade-line-counter) fading-time)
-    (delete-complete-lines! state)
+    (def n-lines
+      ((delete-complete-lines! state) :result))
     (put state :fade-line-counter 0)
     (put state :line-to-delete false)
-    (++ (state :lines)))
+    (+= (state :lines) n-lines))
   #
   state)
 
