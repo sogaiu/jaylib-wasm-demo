@@ -429,6 +429,52 @@
     (j/pause-music-stream bgm)
     (j/resume-music-stream bgm)))
 
+(defn handle-active-piece
+  []
+  (++ fast-fall-move-counter)
+  (++ gravity-move-counter)
+  (++ lateral-move-counter)
+  (++ turn-move-counter)
+  # arrange for move if necessary
+  (when (or (j/key-pressed? :a)
+            (j/key-pressed? :d))
+    (set lateral-move-counter lateral-speed))
+  (when (j/key-pressed? :w)
+    (set turn-move-counter turning-speed))
+  # fall?
+  (when (and (j/key-down? :s)
+             (>= fast-fall-move-counter
+                 fast-fall-await-counter))
+    (+= gravity-move-counter gravity-speed))
+  (when (>= gravity-move-counter gravity-speed)
+    # falling
+    (check-detection)
+    # collision?
+    (resolve-falling-move)
+    # any lines completed?
+    (check-completion)
+    (set gravity-move-counter 0))
+  # side ways move
+  (when (>= lateral-move-counter lateral-speed)
+    (when (not (resolve-lateral-move))
+      (set lateral-move-counter 0)))
+  # turning
+  (when (>= turn-move-counter turning-speed)
+    (when (resolve-turn-move)
+      (set turn-move-counter 0))))
+
+(defn handle-line-deletion
+  []
+  (++ fade-line-counter)
+  (if (< (% fade-line-counter 8) 4)
+    (set fading-color :maroon)
+    (set fading-color :gray))
+  (when (>= fade-line-counter fading-time)
+    (delete-complete-lines)
+    (set fade-line-counter 0)
+    (set line-to-delete false)
+    (++ lines)))
+
 (defn update-game
   []
   (if game-over
@@ -442,60 +488,20 @@
         (toggle-pause))
       #
       (when (not pause)
-        (if (not line-to-delete)
+        (if line-to-delete
+          (handle-line-deletion)
           (do
-            (if (not piece-active)
-              (do # piece not falling
+            (if piece-active
+              (handle-active-piece)
+              (do # piece not moving
                 (set piece-active (create-piece))
-                (set fast-fall-move-counter 0))
-              (do # piece falling
-                (++ fast-fall-move-counter)
-                (++ gravity-move-counter)
-                (++ lateral-move-counter)
-                (++ turn-move-counter)
-                # arrange for move if necessary
-                (when (or (j/key-pressed? :a)
-                          (j/key-pressed? :d))
-                  (set lateral-move-counter lateral-speed))
-                (when (j/key-pressed? :w)
-                  (set turn-move-counter turning-speed))
-                # fall?
-                (when (and (j/key-down? :s)
-                           (>= fast-fall-move-counter
-                               fast-fall-await-counter))
-                  (+= gravity-move-counter gravity-speed))
-                (when (>= gravity-move-counter gravity-speed)
-                  # falling
-                  (check-detection)
-                  # collision?
-                  (resolve-falling-move)
-                  # any lines completed?
-                  (check-completion)
-                  (set gravity-move-counter 0))
-                # side ways move
-                (when (>= lateral-move-counter lateral-speed)
-                  (when (not (resolve-lateral-move))
-                    (set lateral-move-counter 0)))
-                # turning
-                (when (>= turn-move-counter turning-speed)
-                  (when (resolve-turn-move)
-                    (set turn-move-counter 0)))))
+                (set fast-fall-move-counter 0)))
             # game over?
             (loop [j :range [0 2] # XXX: 2?
                    i :range [1 (dec grid-x-size)]
                    :when (= :full
                             (get-in grid [i j]))]
-              (set game-over true)))
-          (do # there is a line to delete
-            (++ fade-line-counter)
-            (if (< (% fade-line-counter 8) 4)
-              (set fading-color :maroon)
-              (set fading-color :gray))
-            (when (>= fade-line-counter fading-time)
-              (delete-complete-lines)
-              (set fade-line-counter 0)
-              (set line-to-delete false)
-              (++ lines))))))))
+              (set game-over true))))))))
 
 (defn draw-grid
   []
