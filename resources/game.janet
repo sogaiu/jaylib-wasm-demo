@@ -74,8 +74,6 @@
 
 (var fading-color nil)
 
-(var begin-play true)
-
 (var piece-active false)
 
 (var detection false)
@@ -131,15 +129,15 @@
     (put-in future-piece a-unit :moving)))
 
 (defn create-piece
-  []
+  [state]
   (set piece-pos-x
        (math/floor (/ (- grid-x-size 4)
                       2)))
   (set piece-pos-y 0)
   # create extra piece this one time
-  (when begin-play
+  (when (state :begin-play)
     (get-random-piece)
-    (set begin-play false))
+    (put state :begin-play false))
   # copy newly obtained future-piece to piece
   (loop [i :range [0 piece-dim]
          j :range [0 piece-dim]]
@@ -154,7 +152,7 @@
                   (get-in piece [(- i piece-pos-x) j]))]
     (put-in grid [i j] :moving))
   #
-  true)
+  state)
 
 (defn resolve-falling-move
   []
@@ -415,7 +413,6 @@
   (set fading-color :gray)
   (set piece-pos-x 0)
   (set piece-pos-y 0)
-  (set begin-play true)
   (set piece-active false)
   (set detection false)
   (set line-to-delete false)
@@ -429,6 +426,7 @@
   (set future-piece (init-piece future-piece))
   (put state :game-over false)
   (put state :pause false)
+  (put state :begin-play true)
   state)
 
 (defn toggle-mute
@@ -493,9 +491,11 @@
       (set turn-move-counter 0))))
 
 (defn init-active-piece
-  []
-  (set piece-active (create-piece))
-  (set fast-fall-move-counter 0))
+  [state]
+  (create-piece state)
+  (set piece-active true)
+  (set fast-fall-move-counter 0)
+  state)
 
 (defn check-game-over
   [state]
@@ -529,7 +529,7 @@
   #
   (if piece-active
     (handle-active-piece)
-    (init-active-piece))
+    (init-active-piece state))
   #
   (check-game-over state)
   state)
