@@ -235,13 +235,11 @@
   []
   (cond
     (j/key-down? :a)
-    # move left if possible
     (when (not (left-blocked?))
       (move-left)
       (break false))
     #
     (j/key-down? :d)
-    # move right if possible
     (when (not (right-blocked?))
       (move-right)
       (break false)))
