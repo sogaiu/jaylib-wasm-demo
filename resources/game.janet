@@ -520,6 +520,7 @@
   (create-piece! state)
   (put state :piece-active true)
   (put state :fast-fall-move-counter 0)
+  #
   state)
 
 (defn check-game-over!
@@ -530,6 +531,7 @@
                   (get-in state [:grid i j]))]
     (put state :game-over true)
     (break))
+  #
   state)
 
 (defn update-game!
@@ -715,6 +717,7 @@
   #
   (when bgm
     (j/update-music-stream bgm))
+  #
   (-> state
       update-game!
       draw-game))
