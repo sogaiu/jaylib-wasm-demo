@@ -32,11 +32,11 @@
 
 ###########################################################################
 
+(var state @{})
+
 (var screen-width 800)
 
 (var screen-height 450)
-
-(var game-over false)
 
 (var pause false)
 
@@ -411,7 +411,7 @@
   a-piece)
 
 (defn init-game
-  []
+  [state]
   (set level 1)
   (set lines 0)
   (set fading-color :gray)
@@ -430,7 +430,8 @@
   (set gravity-speed 30)
   (set grid (init-grid grid))
   (set future-piece (init-piece future-piece))
-  (set game-over false))
+  (put state :game-over false)
+  state)
 
 (defn toggle-mute
   []
@@ -498,19 +499,21 @@
   (set fast-fall-move-counter 0))
 
 (defn check-game-over
-  []
+  [state]
   (loop [j :range [0 2] # XXX: 2?
          i :range [1 (dec grid-x-size)]
          :when (= :full
                   (get-in grid [i j]))]
-    (set game-over true)))
+    (put state :game-over true)
+    (break))
+  state)
 
 (defn update-game
-  []
-  (when game-over
+  [state]
+  (when (state :game-over)
     (when (j/key-pressed? :enter)
-      (init-game))
-    (break))
+      (init-game state))
+    (break state))
   #
   (when (j/key-pressed? :m)
     (toggle-mute))
@@ -519,17 +522,18 @@
     (toggle-pause))
   #
   (when pause
-    (break))
+    (break state))
   #
   (when line-to-delete
     (handle-line-deletion)
-    (break))
+    (break state))
   #
   (if piece-active
     (handle-active-piece)
     (init-active-piece))
   #
-  (check-game-over))
+  (check-game-over state)
+  state)
 
 (defn draw-grid
   []
@@ -651,12 +655,12 @@
                  20 :gray)))
 
 (defn draw-game
-  []
+  [state]
   (j/begin-drawing)
   #
   (j/clear-background :dark-green)
   #
-  (if game-over
+  (if (state :game-over)
     (draw-play-again-overlay)
     (do
       (draw-grid)
@@ -665,7 +669,8 @@
       (when pause
         (draw-pause-overlay))))
   #
-  (j/end-drawing))
+  (j/end-drawing)
+  state)
 
 (defn update-draw-frame
   []
@@ -677,8 +682,9 @@
   (setdyn :frame (inc (dyn :frame)))
   (when bgm
     (j/update-music-stream bgm))
-  (update-game)
-  (draw-game))
+  (-> state
+      update-game
+      draw-game))
 
 (defn desktop
   []
@@ -694,7 +700,8 @@
 (j/play-music-stream bgm)
 (j/set-music-volume bgm bgm-volume)
 
-(init-game)
+(set state
+     (init-game state))
 
 # XXX
 (setdyn :frame 0)
@@ -725,7 +732,7 @@
   #
   (j/set-exit-key 0)
   #
-  (init-game)
+  (init-game state)
   #
   (while (not (j/window-should-close))
     (update-draw-frame))
