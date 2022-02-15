@@ -50,6 +50,7 @@ void UpdateDrawFrame(void) {
     janet_stacktrace(game_fiber, ret);
     janet_deinit();
     game_fiber = NULL;
+    udf_fn = NULL;
     // XXX
     abort();
   }
@@ -115,6 +116,7 @@ int main(int argc, char** argv) {
     printf("error during desktop-specific init\n");
     janet_deinit();
     game_fiber = NULL;
+    udf_fn = NULL;
     return -1;
   }
 
