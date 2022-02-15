@@ -59,18 +59,6 @@
 # :moving - spot is part of piece
 (var piece @[])
 
-# x-coordinate of top-left of "piece grid"
-#
-# "piece grid" is a piece-dim x piece-dim square of spots within the
-# game grid.  the spots within the "piece grid" that represent the
-# piece have the value :moving, while the other spots within the
-# "piece grid" that are not occupied by the piece have the value
-# :empty.
-(var piece-pos-x 0)
-
-# y-coordinate of top-left of "piece grid"
-(var piece-pos-y 0)
-
 ###########################################################################
 
 (var bgm nil)
@@ -105,8 +93,16 @@
 
 (defn init-game
   [state]
-  (set piece-pos-x 0)
-  (set piece-pos-y 0)
+  # x-coordinate of top-left of "piece grid"
+  #
+  # "piece grid" is a piece-dim x piece-dim square of spots within the
+  # game grid.  the spots within the "piece grid" that represent the
+  # piece have the value :moving, while the other spots within the
+  # "piece grid" that are not occupied by the piece have the value
+  # :empty.
+  (put state :piece-pos-x 0)
+  # y-coordinate of top-left of "piece grid"
+  (put state :piece-pos-y 0)
   (set grid (init-grid grid))
   # same structure and content as piece
   (put state :future-piece (init-piece))
@@ -125,6 +121,8 @@
   (put state :turn-move-counter 0)
   (put state :fast-fall-move-counter 0)
   (put state :fade-line-counter 0)
+  # XXX: hack for retrieving result of function invocation
+  (put state :result nil)
   state)
 
 (defn get-random-piece
@@ -153,10 +151,10 @@
 
 (defn create-piece
   [state]
-  (set piece-pos-x
+  (put state :piece-pos-x
        (math/floor (/ (- grid-x-size 4)
                       2)))
-  (set piece-pos-y 0)
+  (put state :piece-pos-y 0)
   # create extra piece this one time
   (when (state :begin-play)
     (get-random-piece state)
@@ -169,6 +167,7 @@
   # get another future piece
   (get-random-piece state)
   # put the piece in the grid
+  (def piece-pos-x (state :piece-pos-x))
   (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
          j :range [0 piece-dim]
          :when (= :moving
@@ -197,7 +196,8 @@
         (-> grid
             (put-in [i (inc j)] :moving)
             (put-in [i j] :empty)))
-      (++ piece-pos-y)))
+      (++ (state :piece-pos-y))))
+  #
   state)
 
 (defn left-blocked?
@@ -215,7 +215,7 @@
   collision)
 
 (defn move-left
-  []
+  [state]
   (loop [j :down-to [(- grid-y-size 2) 0]
          i :range [1 (dec grid-x-size)]
          :when (= :moving
@@ -223,7 +223,9 @@
     (-> grid
         (put-in [(dec i) j] :moving)
         (put-in  [i j] :empty)))
-  (-- piece-pos-x))
+  (-- (state :piece-pos-x))
+  #
+  state)
 
 (defn right-blocked?
   []
@@ -241,7 +243,7 @@
   collision)
 
 (defn move-right
-  []
+  [state]
   (loop [j :down-to [(- grid-y-size 2) 0]
          i :down-to [(dec grid-x-size) 1]
          :when (= :moving
@@ -249,24 +251,28 @@
     (-> grid
         (put-in [(inc i) j] :moving)
         (put-in [i j] :empty)))
-  (++ piece-pos-x))
+  (++ (state :piece-pos-x))
+  #
+  state)
 
 (defn resolve-lateral-move
-  []
+  [state]
   (var collision true)
   #
   (cond
     (j/key-down? :a)
     (when (not (left-blocked?))
-      (move-left)
+      (move-left state)
       (set collision false))
     #
     (j/key-down? :d)
     (when (not (right-blocked?))
-      (move-right)
+      (move-right state)
       (set collision false)))
   #
-  collision)
+  (put state :result collision)
+  #
+  state)
 
 (defn blocked?
   [src dst]
@@ -275,40 +281,45 @@
        (not= :moving (get-in grid dst))))
 
 (defn can-rotate?
-  []
-  (not
-    (or (blocked? [(+ piece-pos-x 3) piece-pos-y]
-                  [piece-pos-x piece-pos-y])
-        (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 3)]
-                  [(+ piece-pos-x 3) piece-pos-y])
-        (blocked? [piece-pos-x (+ piece-pos-y 3)]
-                  [(+ piece-pos-x 3) (+ piece-pos-y 3)])
-        (blocked? [piece-pos-x piece-pos-y]
-                  [piece-pos-x (+ piece-pos-y 3)])
-        (blocked? [(+ piece-pos-x 1) piece-pos-y]
-                  [piece-pos-x (+ piece-pos-y 2)])
-        (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 1)]
-                  [(+ piece-pos-x 1) piece-pos-y])
-        (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 3)]
-                  [(+ piece-pos-x 3) (+ piece-pos-y 1)])
-        (blocked? [piece-pos-x (+ piece-pos-y 2)]
-                  [(+ piece-pos-x 2) (+ piece-pos-y 3)])
-        (blocked? [(+ piece-pos-x 2) piece-pos-y]
-                  [piece-pos-x (+ piece-pos-y 1)])
-        (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 2)]
-                  [(+ piece-pos-x 2) piece-pos-y])
-        (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 3)]
-                  [(+ piece-pos-x 3) (+ piece-pos-y 2)])
-        (blocked? [piece-pos-x (+ piece-pos-y 1)]
-                  [(+ piece-pos-x 1) (+ piece-pos-y 3)])
-        (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 1)]
-                  [(+ piece-pos-x 1) (+ piece-pos-y 2)])
-        (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 1)]
-                  [(+ piece-pos-x 1) (+ piece-pos-y 1)])
-        (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 2)]
-                  [(+ piece-pos-x 2) (+ piece-pos-y 1)])
-        (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 2)]
-                  [(+ piece-pos-x 2) (+ piece-pos-y 2)]))))
+  [state]
+  (def piece-pos-x (state :piece-pos-x))
+  (def piece-pos-y (state :piece-pos-y))
+  (put state :result
+       (not
+         (or (blocked? [(+ piece-pos-x 3) piece-pos-y]
+                       [piece-pos-x piece-pos-y])
+             (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 3)]
+                       [(+ piece-pos-x 3) piece-pos-y])
+             (blocked? [piece-pos-x (+ piece-pos-y 3)]
+                       [(+ piece-pos-x 3) (+ piece-pos-y 3)])
+             (blocked? [piece-pos-x piece-pos-y]
+                       [piece-pos-x (+ piece-pos-y 3)])
+             (blocked? [(+ piece-pos-x 1) piece-pos-y]
+                       [piece-pos-x (+ piece-pos-y 2)])
+             (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 1)]
+                       [(+ piece-pos-x 1) piece-pos-y])
+             (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 3)]
+                       [(+ piece-pos-x 3) (+ piece-pos-y 1)])
+             (blocked? [piece-pos-x (+ piece-pos-y 2)]
+                       [(+ piece-pos-x 2) (+ piece-pos-y 3)])
+             (blocked? [(+ piece-pos-x 2) piece-pos-y]
+                       [piece-pos-x (+ piece-pos-y 1)])
+             (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 2)]
+                       [(+ piece-pos-x 2) piece-pos-y])
+             (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 3)]
+                       [(+ piece-pos-x 3) (+ piece-pos-y 2)])
+             (blocked? [piece-pos-x (+ piece-pos-y 1)]
+                       [(+ piece-pos-x 1) (+ piece-pos-y 3)])
+             (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 1)]
+                       [(+ piece-pos-x 1) (+ piece-pos-y 2)])
+             (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 1)]
+                       [(+ piece-pos-x 1) (+ piece-pos-y 1)])
+             (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 2)]
+                       [(+ piece-pos-x 2) (+ piece-pos-y 1)])
+             (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 2)]
+                       [(+ piece-pos-x 2) (+ piece-pos-y 2)]))))
+  #
+  state)
 
 (defn rotate-ccw
   []
@@ -326,10 +337,12 @@
   (left-rotate-units [[1 1] [2 1] [2 2] [1 2]]))
 
 (defn resolve-turn-move
-  []
+  [state]
+  (var result false)
+  #
   (when (j/key-down? :w)
     # rotate piece counterclockwise if appropriate
-    (when (can-rotate?)
+    (when ((can-rotate? state) :result)
       (rotate-ccw))
     # clear grid spots occupied that were occupied by piece
     (loop [j :down-to [(- grid-y-size 2) 0]
@@ -338,6 +351,8 @@
                     (get-in grid [i j]))]
       (put-in grid [i j] :empty))
     # fill grid spots that the piece occupies
+    (def piece-pos-x (state :piece-pos-x))
+    (def piece-pos-y (state :piece-pos-y))
     (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
            j :range [piece-pos-y (+ piece-pos-y 4)]
            :when (= :moving
@@ -345,9 +360,11 @@
                             [(- i piece-pos-x) (- j piece-pos-y)]))]
       (put-in grid [i j] :moving))
     #
-    (break true))
+    (set result true))
   #
-  false)
+  (put state :result result)
+  #
+  state)
 
 (defn check-detection
   [state]
@@ -465,11 +482,11 @@
     (put state :gravity-move-counter 0))
   # sideways move
   (when (>= (state :lateral-move-counter) lateral-speed)
-    (when (not (resolve-lateral-move))
+    (when (not ((resolve-lateral-move state) :result))
       (put state :lateral-move-counter 0)))
   # turning
   (when (>= (state :turn-move-counter) turning-speed)
-    (when (resolve-turn-move)
+    (when ((resolve-turn-move state) :result)
       (put state :turn-move-counter 0)))
   #
   state)
