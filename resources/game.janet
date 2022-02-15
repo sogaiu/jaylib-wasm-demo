@@ -40,17 +40,6 @@
 
 (var screen-height 450)
 
-# 2-d array with dimensions grid-x-size x grid-y-size
-#
-# possibly values include:
-#
-# :empty  - space unoccupied
-# :full   - occupied (by what was part of past piece)
-# :moving - occupied by part of in-motion piece
-# :block  - pre-filled space - left, right, or bottom edge
-# :fading - about to be deleted / cleared
-(var grid @[])
-
 ###########################################################################
 
 (var bgm nil)
@@ -60,7 +49,8 @@
 ###########################################################################
 
 (defn init-grid
-  [a-grid]
+  []
+  (def a-grid @[])
   (loop [i :range [0 grid-x-size]
          :before (put a-grid i (array/new grid-y-size))
          j :range [0 grid-y-size]]
@@ -95,7 +85,16 @@
   (put state :piece-pos-x 0)
   # y-coordinate of top-left of "piece grid"
   (put state :piece-pos-y 0)
-  (set grid (init-grid grid))
+  # 2-d array with dimensions grid-x-size x grid-y-size
+  #
+  # possibly values include:
+  #
+  # :empty  - space unoccupied
+  # :full   - occupied (by what was part of past piece)
+  # :moving - occupied by part of in-motion piece
+  # :block  - pre-filled space - left, right, or bottom edge
+  # :fading - about to be deleted / cleared
+  (put state :grid (init-grid))
   # 2-d array with dimensions piece-dim x piece-dim
   #
   # possible values include:
@@ -171,12 +170,14 @@
          j :range [0 piece-dim]
          :when (= :moving
                   (get-in state [:piece (- i piece-pos-x) j]))]
-    (put-in grid [i j] :moving))
+    (put-in state [:grid i j] :moving))
   #
   state)
 
 (defn resolve-falling-move
   [state]
+  (def grid (state :grid))
+  #
   (if (state :detection)
     # stop the piece
     (loop [j :down-to [(- grid-y-size 2) 0]
@@ -192,18 +193,18 @@
              i :range [1 (dec grid-x-size)]
              :when (= :moving
                       (get-in grid [i j]))]
-        (-> grid
-            (put-in [i (inc j)] :moving)
-            (put-in [i j] :empty)))
+        (put-in grid [i (inc j)] :moving)
+        (put-in grid [i j] :empty))
       (++ (state :piece-pos-y))))
   #
   state)
 
 (defn left-blocked?
-  []
+  [state]
   (var collision false)
   (loop [j :down-to [(- grid-y-size 2) 0]
          i :range [1 (dec grid-x-size)]
+         :let [grid (state :grid)]
          :when (and (= :moving
                        (get-in grid [i j]))
                     (or (zero? (dec i))
@@ -211,26 +212,29 @@
                            (get-in grid [(dec i) j]))))]
     (set collision true)
     (break))
-  collision)
+  (put state :result collision)
+  #
+  state)
 
 (defn move-left
   [state]
   (loop [j :down-to [(- grid-y-size 2) 0]
          i :range [1 (dec grid-x-size)]
+         :let [grid (state :grid)]
          :when (= :moving
                   (get-in grid [i j]))]
-    (-> grid
-        (put-in [(dec i) j] :moving)
-        (put-in  [i j] :empty)))
+    (put-in grid [(dec i) j] :moving)
+    (put-in grid [i j] :empty))
   (-- (state :piece-pos-x))
   #
   state)
 
 (defn right-blocked?
-  []
+  [state]
   (var collision false)
   (loop [j :down-to [(- grid-y-size 2) 0]
          i :range [1 (dec grid-x-size)]
+         :let [grid (state :grid)]
          :when (and (= :moving
                        (get-in grid [i j]))
                     (or (= (inc i)
@@ -239,17 +243,19 @@
                            (get-in grid [(inc i) j]))))]
     (set collision true)
     (break))
-  collision)
+  (put state :result collision)
+  #
+  state)
 
 (defn move-right
   [state]
   (loop [j :down-to [(- grid-y-size 2) 0]
          i :down-to [(dec grid-x-size) 1]
+         :let [grid (state :grid)]
          :when (= :moving
                   (get-in grid [i j]))]
-    (-> grid
-        (put-in [(inc i) j] :moving)
-        (put-in [i j] :empty)))
+    (put-in grid [(inc i) j] :moving)
+    (put-in grid [i j] :empty))
   (++ (state :piece-pos-x))
   #
   state)
@@ -260,12 +266,12 @@
   #
   (cond
     (j/key-down? :a)
-    (when (not (left-blocked?))
+    (when (not ((left-blocked? state) :result))
       (move-left state)
       (set collision false))
     #
     (j/key-down? :d)
-    (when (not (right-blocked?))
+    (when (not ((right-blocked? state) :result))
       (move-right state)
       (set collision false)))
   #
@@ -273,16 +279,18 @@
   #
   state)
 
-(defn blocked?
-  [src dst]
-  (and (= :moving (get-in grid src))
-       (not= :empty (get-in grid dst))
-       (not= :moving (get-in grid dst))))
-
 (defn can-rotate?
   [state]
+  (def grid (state :grid))
+  (defn blocked?
+    [src dst]
+    (and (= :moving (get-in grid src))
+         (not= :empty (get-in grid dst))
+         (not= :moving (get-in grid dst))))
+  #
   (def piece-pos-x (state :piece-pos-x))
   (def piece-pos-y (state :piece-pos-y))
+  #
   (put state :result
        (not
          (or (blocked? [(+ piece-pos-x 3) piece-pos-y]
@@ -339,6 +347,7 @@
 (defn resolve-turn-move
   [state]
   (var result false)
+  (def grid (state :grid))
   #
   (when (j/key-down? :w)
     # rotate piece counterclockwise if appropriate
@@ -372,6 +381,7 @@
   # cannot be moved into (i.e. :full or :block)
   (loop [j :down-to [(- grid-y-size 2) 0]
          i :range [1 (dec grid-x-size)]
+         :let [grid (state :grid)]
          :when (and (= :moving
                        (get-in grid [i j]))
                     (or (= :full
@@ -385,7 +395,8 @@
   [state]
   (var calculator 0)
   # determine if any lines need to be deleted
-  (loop [j :down-to [(- grid-y-size 2) 0]]
+  (loop [j :down-to [(- grid-y-size 2) 0]
+         :let [grid (state :grid)]]
     (set calculator 0)
     # count spots that are occupied by stationary blocks (i.e. :full)
     (loop [i :range [1 (dec grid-x-size)]]
@@ -405,7 +416,8 @@
 (defn delete-complete-lines
   []
   # start at the bottom row (above the bottom :block row) and work way upward
-  (loop [j :down-to [(- grid-y-size 2) 0]]
+  (loop [j :down-to [(- grid-y-size 2) 0]
+         :let [grid (state :grid)]]
     # if left-most spot is :fading, whole row is
     (while (= :fading
               (get-in grid [1 j]))
@@ -503,7 +515,7 @@
   (loop [j :range [0 2] # XXX: 2?
          i :range [1 (dec grid-x-size)]
          :when (= :full
-                  (get-in grid [i j]))]
+                  (get-in state [:grid i j]))]
     (put state :game-over true)
     (break))
   state)
@@ -550,7 +562,7 @@
   # draw grid
   (for j 0 grid-y-size
     (for i 0 grid-x-size
-      (case (get-in grid [i j])
+      (case (get-in state [:grid i j])
         :empty
         (do # outline of square
           (j/draw-line offset-x offset-y
@@ -584,7 +596,7 @@
                           (state :fading-color))
         #
         (eprintf "Unexpected value: %p at %p, %p"
-                 (get-in grid [i j]) i j))
+                 (get-in state [:grid i j]) i j))
       (+= offset-x square-size))
     (set offset-x controller)
     (+= offset-y square-size))
