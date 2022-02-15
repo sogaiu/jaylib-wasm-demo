@@ -373,10 +373,10 @@
 
 (defn init-grid
   [a-grid]
-  (each i (range grid-x-size)
+  (loop [i :range [0 grid-x-size]]
     (put a-grid i (array/new grid-y-size))
     # work on a column at a time
-    (each j (range grid-y-size)
+    (loop [j :range [0 grid-y-size]]
       (if (or (= i 0)
               (= i (dec grid-x-size))
               (= j (dec grid-y-size)))
@@ -389,9 +389,9 @@
 (defn init-piece
   [a-piece]
   # mark all spots in a-piece :empty
-  (each i (range piece-dim)
+  (loop [i :range [0 piece-dim]]
     (put a-piece i (array/new piece-dim))
-    (each j (range grid-x-size)
+    (loop [j :range [0 grid-x-size]]
       (put-in a-piece [i j] :empty)))
   a-piece)
 
