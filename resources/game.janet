@@ -233,18 +233,20 @@
 
 (defn resolve-lateral-move
   []
+  (var collision true)
+  #
   (cond
     (j/key-down? :a)
     (when (not (left-blocked?))
       (move-left)
-      (break false))
+      (set collision false))
     #
     (j/key-down? :d)
     (when (not (right-blocked?))
       (move-right)
-      (break false)))
+      (set collision false)))
   #
-  true)
+  collision)
 
 (defn blocked?
   [src dst]
