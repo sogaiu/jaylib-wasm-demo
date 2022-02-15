@@ -351,8 +351,9 @@
   []
   # start at the bottom row (above the bottom :block row) and work way upward
   (loop [j :down-to [(- grid-y-size 2) 0]]
+    # if left-most spot is :fading, whole row is
     (while (= :fading
-              (get-in grid [1 j])) # if left-most spot is :fading, whole row is
+              (get-in grid [1 j]))
       # delete the current row by marking all spots in it :empty
       (loop [i :range [1 (dec grid-x-size)]]
         (put-in grid [i j] :empty))
