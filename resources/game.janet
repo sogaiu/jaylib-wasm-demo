@@ -72,8 +72,6 @@
 # y-coordinate of top-left of "piece grid"
 (var piece-pos-y 0)
 
-(var turn-move-counter 0)
-
 (var fast-fall-move-counter 0)
 
 (var fade-line-counter 0)
@@ -395,7 +393,6 @@
   [state]
   (set piece-pos-x 0)
   (set piece-pos-y 0)
-  (set turn-move-counter 0)
   (set fast-fall-move-counter 0)
   (set fade-line-counter 0)
   (set gravity-speed 30)
@@ -413,6 +410,7 @@
   (put state :detection false)
   (put state :gravity-move-counter 0)
   (put state :lateral-move-counter 0)
+  (put state :turn-move-counter 0)
   state)
 
 (defn toggle-mute
@@ -449,13 +447,13 @@
   (++ fast-fall-move-counter)
   (++ (state :gravity-move-counter))
   (++ (state :lateral-move-counter))
-  (++ turn-move-counter)
+  (++ (state :turn-move-counter))
   # arrange for move if necessary
   (when (or (j/key-pressed? :a)
             (j/key-pressed? :d))
     (put state :lateral-move-counter lateral-speed))
   (when (j/key-pressed? :w)
-    (set turn-move-counter turning-speed))
+    (put state :turn-move-counter turning-speed))
   # fall?
   (when (and (j/key-down? :s)
              (>= fast-fall-move-counter
@@ -474,9 +472,9 @@
     (when (not (resolve-lateral-move))
       (put state :lateral-move-counter 0)))
   # turning
-  (when (>= turn-move-counter turning-speed)
+  (when (>= (state :turn-move-counter) turning-speed)
     (when (resolve-turn-move)
-      (set turn-move-counter 0)))
+      (put state :turn-move-counter 0)))
   #
   state)
 
