@@ -373,26 +373,25 @@
 
 (defn init-grid
   [a-grid]
-  (loop [i :range [0 grid-x-size]]
-    (put a-grid i (array/new grid-y-size))
-    # work on a column at a time
-    (loop [j :range [0 grid-y-size]]
-      (if (or (= i 0)
-              (= i (dec grid-x-size))
-              (= j (dec grid-y-size)))
-        # pre-fill left, right, and bottom edges of the grid
-        (put-in a-grid [i j] :block)
-        # all other spots are :empty
-        (put-in a-grid [i j] :empty))))
+  (loop [i :range [0 grid-x-size]
+         :before (put a-grid i (array/new grid-y-size))
+         j :range [0 grid-y-size]]
+    (if (or (= i 0)
+            (= i (dec grid-x-size))
+            (= j (dec grid-y-size)))
+      # pre-fill left, right, and bottom edges of the grid
+      (put-in a-grid [i j] :block)
+      # all other spots are :empty
+      (put-in a-grid [i j] :empty)))
   a-grid)
 
 (defn init-piece
   [a-piece]
   # mark all spots in a-piece :empty
-  (loop [i :range [0 piece-dim]]
-    (put a-piece i (array/new piece-dim))
-    (loop [j :range [0 grid-x-size]]
-      (put-in a-piece [i j] :empty)))
+  (loop [i :range [0 piece-dim]
+         :before (put a-piece i (array/new piece-dim))
+         j :range [0 grid-x-size]]
+    (put-in a-piece [i j] :empty))
   a-piece)
 
 (defn init-game
