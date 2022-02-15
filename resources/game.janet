@@ -73,7 +73,7 @@
     (put-in a-piece [i j] :empty))
   a-piece)
 
-(defn init-game
+(defn init-game!
   [state]
   # x-coordinate of top-left of "piece grid"
   #
@@ -123,7 +123,7 @@
   (put state :result nil)
   state)
 
-(defn get-random-piece
+(defn get-random-piece!
   [state]
   # empty out future-piece
   (loop [i :range [0 piece-dim]
@@ -147,7 +147,7 @@
   #
   state)
 
-(defn create-piece
+(defn create-piece!
   [state]
   (put state :piece-pos-x
        (math/floor (/ (- grid-x-size 4)
@@ -155,7 +155,7 @@
   (put state :piece-pos-y 0)
   # create extra piece this one time
   (when (state :begin-play)
-    (get-random-piece state)
+    (get-random-piece! state)
     (put state :begin-play false))
   # copy newly obtained future-piece to piece
   (loop [i :range [0 piece-dim]
@@ -163,7 +163,7 @@
     (put-in state [:piece i j]
             (get-in state [:future-piece i j])))
   # get another future piece
-  (get-random-piece state)
+  (get-random-piece! state)
   # put the piece in the grid
   (def piece-pos-x (state :piece-pos-x))
   (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
@@ -174,7 +174,7 @@
   #
   state)
 
-(defn resolve-falling-move
+(defn resolve-falling-move!
   [state]
   (def grid (state :grid))
   #
@@ -216,7 +216,7 @@
   #
   state)
 
-(defn move-left
+(defn move-left!
   [state]
   (loop [j :down-to [(- grid-y-size 2) 0]
          i :range [1 (dec grid-x-size)]
@@ -247,7 +247,7 @@
   #
   state)
 
-(defn move-right
+(defn move-right!
   [state]
   (loop [j :down-to [(- grid-y-size 2) 0]
          i :down-to [(dec grid-x-size) 1]
@@ -260,19 +260,19 @@
   #
   state)
 
-(defn resolve-lateral-move
+(defn resolve-lateral-move!
   [state]
   (var collision true)
   #
   (cond
     (j/key-down? :a)
     (when (not ((left-blocked? state) :result))
-      (move-left state)
+      (move-left! state)
       (set collision false))
     #
     (j/key-down? :d)
     (when (not ((right-blocked? state) :result))
-      (move-right state)
+      (move-right! state)
       (set collision false)))
   #
   (put state :result collision)
@@ -328,7 +328,7 @@
   #
   state)
 
-(defn rotate-ccw
+(defn rotate-ccw!
   [state]
   (defn left-rotate-units
     [positions]
@@ -344,7 +344,7 @@
   (left-rotate-units [[2 0] [3 2] [1 3] [0 1]])
   (left-rotate-units [[1 1] [2 1] [2 2] [1 2]]))
 
-(defn resolve-turn-move
+(defn resolve-turn-move!
   [state]
   (var result false)
   (def grid (state :grid))
@@ -352,7 +352,7 @@
   (when (j/key-down? :w)
     # rotate piece counterclockwise if appropriate
     (when ((can-rotate? state) :result)
-      (rotate-ccw state))
+      (rotate-ccw! state))
     # clear grid spots occupied that were occupied by piece
     (loop [j :down-to [(- grid-y-size 2) 0]
            i :range [1 (dec grid-x-size)]
@@ -375,7 +375,7 @@
   #
   state)
 
-(defn check-detection
+(defn check-detection!
   [state]
   # check if there is even one spot below the current line that a piece
   # cannot be moved into (i.e. :full or :block)
@@ -389,9 +389,10 @@
                         (= :block
                            (get-in grid [i (inc j)]))))]
     (put state :detection true))
+  #
   state)
 
-(defn check-completion
+(defn check-completion!
   [state]
   (var calculator 0)
   # determine if any lines need to be deleted
@@ -413,7 +414,7 @@
           (put-in grid [z j] :fading)))))
   state)
 
-(defn delete-complete-lines
+(defn delete-complete-lines!
   []
   # start at the bottom row (above the bottom :block row) and work way upward
   (loop [j :down-to [(- grid-y-size 2) 0]
@@ -445,29 +446,30 @@
     (set bgm-volume 0))
   (j/set-music-volume bgm bgm-volume))
 
-(defn toggle-pause
+(defn toggle-pause!
   [state]
   (put state :pause (not (state :pause)))
   (if (state :pause)
     (j/pause-music-stream bgm)
     (j/resume-music-stream bgm))
+  #
   state)
 
-(defn handle-line-deletion
+(defn handle-line-deletion!
   [state]
   (++ (state :fade-line-counter))
   (if (< (% (state :fade-line-counter) 8) 4)
     (put state :fading-color :maroon)
     (put state :fading-color :gray))
   (when (>= (state :fade-line-counter) fading-time)
-    (delete-complete-lines)
+    (delete-complete-lines!)
     (put state :fade-line-counter 0)
     (put state :line-to-delete false)
     (++ (state :lines)))
   #
   state)
 
-(defn handle-active-piece
+(defn handle-active-piece!
   [state]
   (++ (state :fast-fall-move-counter))
   (++ (state :gravity-move-counter))
@@ -486,31 +488,31 @@
     (+= (state :gravity-move-counter) gravity-speed))
   (when (>= (state :gravity-move-counter) gravity-speed)
     # falling
-    (check-detection state)
+    (check-detection! state)
     # collision?
-    (resolve-falling-move state)
+    (resolve-falling-move! state)
     # any lines completed?
-    (check-completion state)
+    (check-completion! state)
     (put state :gravity-move-counter 0))
   # sideways move
   (when (>= (state :lateral-move-counter) lateral-speed)
-    (when (not ((resolve-lateral-move state) :result))
+    (when (not ((resolve-lateral-move! state) :result))
       (put state :lateral-move-counter 0)))
   # turning
   (when (>= (state :turn-move-counter) turning-speed)
-    (when ((resolve-turn-move state) :result)
+    (when ((resolve-turn-move! state) :result)
       (put state :turn-move-counter 0)))
   #
   state)
 
-(defn init-active-piece
+(defn init-active-piece!
   [state]
-  (create-piece state)
+  (create-piece! state)
   (put state :piece-active true)
   (put state :fast-fall-move-counter 0)
   state)
 
-(defn check-game-over
+(defn check-game-over!
   [state]
   (loop [j :range [0 2] # XXX: 2?
          i :range [1 (dec grid-x-size)]
@@ -520,31 +522,32 @@
     (break))
   state)
 
-(defn update-game
+(defn update-game!
   [state]
   (when (state :game-over)
     (when (j/key-pressed? :enter)
-      (init-game state))
+      (init-game! state))
     (break state))
   #
   (when (j/key-pressed? :m)
     (toggle-mute))
   #
   (when (j/key-pressed? :p)
-    (toggle-pause state))
+    (toggle-pause! state))
   #
   (when (state :pause)
     (break state))
   #
   (when (state :line-to-delete)
-    (handle-line-deletion state)
+    (handle-line-deletion! state)
     (break state))
   #
   (if (state :piece-active)
-    (handle-active-piece state)
-    (init-active-piece state))
+    (handle-active-piece! state)
+    (init-active-piece! state))
   #
-  (check-game-over state)
+  (check-game-over! state)
+  #
   state)
 
 (defn draw-grid
@@ -604,7 +607,7 @@
   state)
 
 (defn draw-info-box
-  [state x y]
+  [state [x y]]
   (var offset-x x)
   (var offset-y y)
   (var controller offset-x)
@@ -643,8 +646,10 @@
   (j/draw-text (string/format "LINES:      %04i" (state :lines))
                offset-x (+ offset-y 20)
                10 :gray)
-  # XXX: or return state or?
-  [offset-x offset-y])
+  #
+  (put state :result [offset-x offset-y])
+  #
+  state)
 
 (defn draw-pause-overlay
   []
@@ -680,12 +685,13 @@
     (draw-play-again-overlay)
     (do
       (draw-grid state)
-      (draw-info-box state 500 45) # XXX: hard-coded
+      (draw-info-box state [500 45]) # XXX: hard-coded
       # show pause overlay when appropriate
       (when (state :pause)
         (draw-pause-overlay))))
   #
   (j/end-drawing)
+  #
   state)
 
 (defn update-draw-frame
@@ -696,10 +702,11 @@
       (printf "%02d:%02d:%02d - %p"
               (d :hours) (d :minutes) (d :seconds) (dyn :frame))))
   (setdyn :frame (inc (dyn :frame)))
+  #
   (when bgm
     (j/update-music-stream bgm))
   (-> state
-      update-game
+      update-game!
       draw-game))
 
 (defn desktop
@@ -716,8 +723,7 @@
 (j/play-music-stream bgm)
 (j/set-music-volume bgm bgm-volume)
 
-(set state
-     (init-game state))
+(init-game! state)
 
 # XXX
 (setdyn :frame 0)
@@ -748,7 +754,7 @@
   #
   (j/set-exit-key 0)
   #
-  (init-game state)
+  (init-game! state)
   #
   (while (not (j/window-should-close))
     (update-draw-frame))
