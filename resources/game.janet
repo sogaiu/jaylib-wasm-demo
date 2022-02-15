@@ -415,7 +415,7 @@
   state)
 
 (defn delete-complete-lines!
-  []
+  [state]
   # start at the bottom row (above the bottom :block row) and work way upward
   (loop [j :down-to [(- grid-y-size 2) 0]
          :let [grid (state :grid)]]
@@ -462,7 +462,7 @@
     (put state :fading-color :maroon)
     (put state :fading-color :gray))
   (when (>= (state :fade-line-counter) fading-time)
-    (delete-complete-lines!)
+    (delete-complete-lines! state)
     (put state :fade-line-counter 0)
     (put state :line-to-delete false)
     (++ (state :lines)))
