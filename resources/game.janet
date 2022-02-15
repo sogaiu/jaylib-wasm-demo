@@ -77,8 +77,6 @@
 # whether any lines need to be deleted
 (var line-to-delete false)
 
-(var level 1)
-
 # number of lines deleted so far
 (var lines 0)
 
@@ -405,7 +403,6 @@
 
 (defn init-game
   [state]
-  (set level 1)
   (set lines 0)
   (set piece-pos-x 0)
   (set piece-pos-y 0)
