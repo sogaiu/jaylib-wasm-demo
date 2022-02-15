@@ -232,105 +232,47 @@
   #
   collision)
 
+(defn blocked?
+  [src dst]
+  (and (= :moving (get-in grid src))
+       (not= :empty (get-in grid dst))
+       (not= :moving (get-in grid dst))))
+
 (defn can-rotate?
   []
   (not
-    (or (and (= :moving
-                (get-in grid [(+ piece-pos-x 3) piece-pos-y]))
-             (not= :empty
-                   (get-in grid [piece-pos-x piece-pos-y]))
-             (not= :moving
-                   (get-in grid [piece-pos-x piece-pos-y])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 3)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 3) piece-pos-y]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 3) piece-pos-y])))
-        (and (= :moving
-                (get-in grid [piece-pos-x (+ piece-pos-y 3)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 3)]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 3)])))
-        (and (= :moving
-                (get-in grid [piece-pos-x piece-pos-y]))
-             (not= :empty
-                   (get-in grid [piece-pos-x (+ piece-pos-y 3)]))
-             (not= :moving
-                   (get-in grid [piece-pos-x (+ piece-pos-y 3)])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 1) piece-pos-y]))
-             (not= :empty
-                   (get-in grid [piece-pos-x (+ piece-pos-y 2)]))
-             (not= :moving
-                   (get-in grid [piece-pos-x (+ piece-pos-y 2)])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 1)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 1) piece-pos-y]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 1) piece-pos-y])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 3)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 1)]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 1)])))
-        (and (= :moving
-                (get-in grid [piece-pos-x (+ piece-pos-y 2)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 3)]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 3)])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 2) piece-pos-y]))
-             (not= :empty
-                   (get-in grid [piece-pos-x (+ piece-pos-y 1)]))
-             (not= :moving
-                   (get-in grid [piece-pos-x (+ piece-pos-y 1)])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 2)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 2) piece-pos-y]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 2) piece-pos-y])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 3)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 2)]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 3) (+ piece-pos-y 2)])))
-        (and (= :moving
-                (get-in grid [piece-pos-x (+ piece-pos-y 1)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 3)]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 3)])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 1)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 2)]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 2)])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 1)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 1)]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 1)])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 2)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 1)]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 1)])))
-        (and (= :moving
-                (get-in grid [(+ piece-pos-x 1) (+ piece-pos-y 2)]))
-             (not= :empty
-                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 2)]))
-             (not= :moving
-                   (get-in grid [(+ piece-pos-x 2) (+ piece-pos-y 2)]))))))
+    (or (blocked? [(+ piece-pos-x 3) piece-pos-y]
+                  [piece-pos-x piece-pos-y])
+        (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 3)]
+                  [(+ piece-pos-x 3) piece-pos-y])
+        (blocked? [piece-pos-x (+ piece-pos-y 3)]
+                  [(+ piece-pos-x 3) (+ piece-pos-y 3)])
+        (blocked? [piece-pos-x piece-pos-y]
+                  [piece-pos-x (+ piece-pos-y 3)])
+        (blocked? [(+ piece-pos-x 1) piece-pos-y]
+                  [piece-pos-x (+ piece-pos-y 2)])
+        (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 1)]
+                  [(+ piece-pos-x 1) piece-pos-y])
+        (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 3)]
+                  [(+ piece-pos-x 3) (+ piece-pos-y 1)])
+        (blocked? [piece-pos-x (+ piece-pos-y 2)]
+                  [(+ piece-pos-x 2) (+ piece-pos-y 3)])
+        (blocked? [(+ piece-pos-x 2) piece-pos-y]
+                  [piece-pos-x (+ piece-pos-y 1)])
+        (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 2)]
+                  [(+ piece-pos-x 2) piece-pos-y])
+        (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 3)]
+                  [(+ piece-pos-x 3) (+ piece-pos-y 2)])
+        (blocked? [piece-pos-x (+ piece-pos-y 1)]
+                  [(+ piece-pos-x 1) (+ piece-pos-y 3)])
+        (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 1)]
+                  [(+ piece-pos-x 1) (+ piece-pos-y 2)])
+        (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 1)]
+                  [(+ piece-pos-x 1) (+ piece-pos-y 1)])
+        (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 2)]
+                  [(+ piece-pos-x 2) (+ piece-pos-y 1)])
+        (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 2)]
+                  [(+ piece-pos-x 2) (+ piece-pos-y 2)]))))
 
 (defn rotate-ccw
   []
