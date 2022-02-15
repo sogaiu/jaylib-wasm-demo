@@ -702,8 +702,8 @@
   #
   state)
 
-(defn update-draw-frame
-  []
+(defn update-draw-frame!
+  [state]
   # XXX
   (when (zero? (mod (dyn :frame) 1000))
     (let [d (os/date (os/time) true)]
@@ -733,6 +733,11 @@
 
 (init-game! state)
 
+# to facilitate calling from main.c
+(defn update-draw-frame
+  []
+  (update-draw-frame! state))
+
 # XXX
 (setdyn :frame 0)
 
@@ -745,9 +750,7 @@
     (fn []
       # XXX: this content only gets used when main.c uses janet_continue
       (while (not (window-should-close))
-        (printf "frame: %p" (dyn :frame))
-        (setdyn :frame (inc (dyn :frame)))
-        (update-draw-frame)
+        (update-draw-frame! state)
         (yield)))
     # important for inheriting existing dynamic variables
     :i))
@@ -765,7 +768,7 @@
   (init-game! state)
   #
   (while (not (j/window-should-close))
-    (update-draw-frame))
+    (update-draw-frame! state))
   #
   (j/close-window))
 
