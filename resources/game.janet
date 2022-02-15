@@ -74,8 +74,6 @@
 
 (var fading-color nil)
 
-(var piece-active false)
-
 (var detection false)
 
 # whether any lines need to be deleted
@@ -155,7 +153,7 @@
   state)
 
 (defn resolve-falling-move
-  []
+  [state]
   (if detection
     # stop the piece
     (loop [j :down-to [(- grid-y-size 2) 0]
@@ -164,7 +162,7 @@
                     (get-in grid [i j]))]
       (put-in grid [i j] :full)
       (set detection false)
-      (set piece-active false))
+      (put state :piece-active false))
     # move the piece down
     (do
       (loop [j :down-to [(- grid-y-size 2) 0]
@@ -174,7 +172,8 @@
         (-> grid
             (put-in [i (inc j)] :moving)
             (put-in [i j] :empty)))
-      (++ piece-pos-y))))
+      (++ piece-pos-y)))
+  state)
 
 (defn left-blocked?
   []
@@ -413,7 +412,6 @@
   (set fading-color :gray)
   (set piece-pos-x 0)
   (set piece-pos-y 0)
-  (set piece-active false)
   (set detection false)
   (set line-to-delete false)
   (set gravity-move-counter 0)
@@ -427,6 +425,7 @@
   (put state :game-over false)
   (put state :pause false)
   (put state :begin-play true)
+  (put state :piece-active false)
   state)
 
 (defn toggle-mute
@@ -457,7 +456,7 @@
     (++ lines)))
 
 (defn handle-active-piece
-  []
+  [state]
   (++ fast-fall-move-counter)
   (++ gravity-move-counter)
   (++ lateral-move-counter)
@@ -477,7 +476,7 @@
     # falling
     (check-detection)
     # collision?
-    (resolve-falling-move)
+    (resolve-falling-move state)
     # any lines completed?
     (check-completion)
     (set gravity-move-counter 0))
@@ -488,12 +487,14 @@
   # turning
   (when (>= turn-move-counter turning-speed)
     (when (resolve-turn-move)
-      (set turn-move-counter 0))))
+      (set turn-move-counter 0)))
+  #
+  state)
 
 (defn init-active-piece
   [state]
   (create-piece state)
-  (set piece-active true)
+  (put state :piece-active true)
   (set fast-fall-move-counter 0)
   state)
 
@@ -527,8 +528,8 @@
     (handle-line-deletion)
     (break state))
   #
-  (if piece-active
-    (handle-active-piece)
+  (if (state :piece-active)
+    (handle-active-piece state)
     (init-active-piece state))
   #
   (check-game-over state)
