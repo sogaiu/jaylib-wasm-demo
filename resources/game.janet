@@ -726,38 +726,45 @@
   (j/set-config-flags :msaa-4x-hint)
   (j/set-target-fps 60))
 
-# now that a loop is not being done in janet, this needs to
-# happen
-(j/init-window screen-width screen-height "Jaylib Demo")
+# filled in via common-startup
+(var update-draw-frame nil)
 
-(init-game! state)
+# filled in via common-startup
+(var main-fiber nil)
 
-(j/init-audio-device)
-(put state :bgm (j/load-music-stream "resources/theme.ogg"))
-(j/play-music-stream (state :bgm))
-(j/set-music-volume (state :bgm) (state :bgm-volume))
-
-# to facilitate calling from main.c
-(defn update-draw-frame
+(defn common-startup
   []
-  (update-draw-frame! state))
+  # now that a loop is not being done in janet, this needs to
+  # happen
+  (j/init-window screen-width screen-height "Jaylib Demo")
 
-# XXX
-(setdyn :frame 0)
+  (init-game! state)
 
-# this fiber is used repeatedly by the c code, partly to maintain
-# dynamic variables (as those are per-fiber), but also because reusing
-# a fiber with a function is likely faster than parsing and compiling
-# code each time the game loop performs one iteration
-(def main-fiber
-  (fiber/new
-    (fn []
-      # XXX: this content only gets used when main.c uses janet_continue
-      (while (not (window-should-close))
-        (update-draw-frame! state)
-        (yield)))
-    # important for inheriting existing dynamic variables
-    :i))
+  (j/init-audio-device)
+  (put state :bgm (j/load-music-stream "resources/theme.ogg"))
+  (j/play-music-stream (state :bgm))
+  (j/set-music-volume (state :bgm) (state :bgm-volume))
+
+  # to facilitate calling from main.c
+  (set update-draw-frame
+       |(update-draw-frame! state))
+
+  # XXX
+  (setdyn :frame 0)
+
+  # this fiber is used repeatedly by the c code, partly to maintain
+  # dynamic variables (as those are per-fiber), but also because reusing
+  # a fiber with a function is likely faster than parsing and compiling
+  # code each time the game loop performs one iteration
+  (set main-fiber
+       (fiber/new
+         (fn []
+           # XXX: this content only gets used when main.c uses janet_continue
+           (while (not (window-should-close))
+             (update-draw-frame! state)
+             (yield)))
+         # important for inheriting existing dynamic variables
+         :i)))
 
 # XXX: original code
 '(defn main
