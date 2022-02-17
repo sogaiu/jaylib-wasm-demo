@@ -25,8 +25,9 @@
          :let [grid (state :grid)]
          :when (= :moving
                   (get-in grid [i j]))]
-    (put-in grid [(dec i) j] :moving)
-    (put-in grid [i j] :empty))
+    (-> grid
+        (put-in [(dec i) j] :moving)
+        (put-in [i j] :empty)))
   (-- (state :piece-pos-x))
   #
   state)
@@ -56,8 +57,9 @@
          :let [grid (state :grid)]
          :when (= :moving
                   (get-in grid [i j]))]
-    (put-in grid [(inc i) j] :moving)
-    (put-in grid [i j] :empty))
+    (-> grid
+        (put-in [(inc i) j] :moving)
+        (put-in [i j] :empty)))
   (++ (state :piece-pos-x))
   #
   state)
