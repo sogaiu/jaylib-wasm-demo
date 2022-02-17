@@ -68,21 +68,3 @@
          # important for inheriting existing dynamic variables
          :i)))
 
-# XXX: original code
-'(defn main
-  [& args]
-  (var state @{})
-  #
-  (j/set-config-flags :msaa-4x-hint)
-  (j/init-window p/screen-width p/screen-height "Jaylib Demo")
-  (j/set-target-fps 60)
-  #
-  (j/set-exit-key 0)
-  #
-  (s/init! state)
-  #
-  (while (not (j/window-should-close))
-    (update-draw-frame! state))
-  #
-  (j/close-window))
-
