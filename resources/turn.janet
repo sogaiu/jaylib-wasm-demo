@@ -53,11 +53,17 @@
 # in a similar manner.
 #
 # this is done in can-rotate? below.
+
 (def rot-info
-  [[[0 0] [3 0] [3 3] [0 3]]
-   [[1 0] [3 1] [2 3] [0 2]]
-   [[2 0] [3 2] [1 3] [0 1]]
-   [[1 1] [2 1] [2 2] [1 2]]])
+  {3
+   [[[0 0] [2 0] [2 2] [0 2]]
+    [[1 0] [2 1] [1 2] [0 1]]]
+   4
+   [[[0 0] [3 0] [3 3] [0 3]]
+    [[1 0] [3 1] [2 3] [0 2]]
+    [[2 0] [3 2] [1 3] [0 1]]
+    [[1 1] [2 1] [2 2] [1 2]]]
+   })
 
 (defn can-rotate?
   [state]
@@ -72,7 +78,7 @@
   (def piece-pos-y (state :piece-pos-y))
   #
   (var blocked false)
-  (loop [row :in rot-info
+  (loop [row :in (rot-info p/piece-dim)
          i :range [0 (length row)]
          :let [[x1 y1] (get row i)
                [x2 y2] (if (not= i (dec (length row)))
@@ -98,7 +104,7 @@
               (get-in piece (get positions (inc i)))))
     (put-in piece (last positions) aux))
   #
-  (each row rot-info
+  (each row (rot-info p/piece-dim)
     (left-rotate-units row))
   #
   state)
@@ -121,8 +127,8 @@
     # fill grid spots that the piece occupies
     (def piece-pos-x (state :piece-pos-x))
     (def piece-pos-y (state :piece-pos-y))
-    (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
-           j :range [piece-pos-y (+ piece-pos-y 4)]
+    (loop [i :range [piece-pos-x (+ piece-pos-x p/piece-dim)]
+           j :range [piece-pos-y (+ piece-pos-y p/piece-dim)]
            :when (= :moving
                     (get-in state
                             [:piece (- i piece-pos-x) (- j piece-pos-y)]))]

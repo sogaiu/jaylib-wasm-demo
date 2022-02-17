@@ -112,6 +112,20 @@
   #'(math/rng (os/cryptorand 8))
   )
 
+(def pieces-for-dim
+  {3
+   [[[1 0] [1 1] [2 1]]
+    [[0 1] [1 1] [2 1]]]
+   4
+   [[[1 1] [2 1] [1 2] [2 2]]  # O
+    [[1 0] [1 1] [1 2] [2 2]]  # L
+    [[1 2] [2 0] [2 1] [2 2]]  # J
+    [[0 1] [1 1] [2 1] [3 1]]  # I
+    [[1 0] [1 1] [1 2] [2 1]]  # T
+    [[1 1] [2 1] [2 2] [3 2]]  # Z
+    [[1 2] [2 2] [2 1] [3 1]]] # S
+   })
+
 (defn get-random-piece!
   [state]
   (def future-piece
@@ -122,13 +136,7 @@
     (put-in future-piece [i j] :empty))
   #
   (def pieces
-    [[[1 1] [2 1] [1 2] [2 2]]   # O
-     [[1 0] [1 1] [1 2] [2 2]]   # L
-     [[1 2] [2 0] [2 1] [2 2]]   # J
-     [[0 1] [1 1] [2 1] [3 1]]   # I
-     [[1 0] [1 1] [1 2] [2 1]]   # T
-     [[1 1] [2 1] [2 2] [3 2]]   # Z
-     [[1 2] [2 2] [2 1] [3 1]]]) # S
+    (pieces-for-dim p/piece-dim))
   # choose a random piece
   # XXX: docs say math/rng-int will return up through max, but only max - 1?
   (loop [a-unit :in (get pieces
@@ -141,7 +149,7 @@
 (defn create-piece!
   [state]
   (put state :piece-pos-x
-       (math/floor (/ (- p/grid-x-size 4)
+       (math/floor (/ (- p/grid-x-size p/piece-dim)
                       2)))
   (put state :piece-pos-y 0)
   # create extra piece this one time
@@ -157,7 +165,7 @@
   (get-random-piece! state)
   # put the piece in the grid
   (def piece-pos-x (state :piece-pos-x))
-  (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
+  (loop [i :range [piece-pos-x (+ piece-pos-x p/piece-dim)]
          j :range [0 p/piece-dim]
          :when (= :moving
                   (get-in state [:piece (- i piece-pos-x) j]))]
