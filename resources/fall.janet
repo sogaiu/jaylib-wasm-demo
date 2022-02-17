@@ -47,8 +47,8 @@
   (var calculator 0)
   # determine if any lines need to be deleted
   (loop [j :down-to [(- p/grid-y-size 2) 0]
-         :let [grid (state :grid)]]
-    (set calculator 0)
+         :let [grid (state :grid)]
+         :before (set calculator 0)]
     # count spots that are occupied by stationary blocks (i.e. :full)
     (loop [i :range [1 (dec p/grid-x-size)]]
       (when (= :full
