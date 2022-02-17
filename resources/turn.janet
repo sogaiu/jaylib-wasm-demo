@@ -1,6 +1,12 @@
 (import jaylib :as j)
 (import ./params :as p)
 
+(def rot-info
+  [[[0 0] [3 0] [3 3] [0 3]]
+   [[1 0] [3 1] [2 3] [0 2]]
+   [[2 0] [3 2] [1 3] [0 1]]
+   [[1 1] [2 1] [2 2] [1 2]]])
+
 (defn can-rotate?
   [state]
   (def grid (state :grid))
@@ -13,40 +19,18 @@
   (def piece-pos-x (state :piece-pos-x))
   (def piece-pos-y (state :piece-pos-y))
   #
-  (put state :result
-       (not
-         (or (blocked? [(+ piece-pos-x 3) piece-pos-y]
-                       [piece-pos-x piece-pos-y])
-             (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 3)]
-                       [(+ piece-pos-x 3) piece-pos-y])
-             (blocked? [piece-pos-x (+ piece-pos-y 3)]
-                       [(+ piece-pos-x 3) (+ piece-pos-y 3)])
-             (blocked? [piece-pos-x piece-pos-y]
-                       [piece-pos-x (+ piece-pos-y 3)])
-             (blocked? [(+ piece-pos-x 1) piece-pos-y]
-                       [piece-pos-x (+ piece-pos-y 2)])
-             (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 1)]
-                       [(+ piece-pos-x 1) piece-pos-y])
-             (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 3)]
-                       [(+ piece-pos-x 3) (+ piece-pos-y 1)])
-             (blocked? [piece-pos-x (+ piece-pos-y 2)]
-                       [(+ piece-pos-x 2) (+ piece-pos-y 3)])
-             (blocked? [(+ piece-pos-x 2) piece-pos-y]
-                       [piece-pos-x (+ piece-pos-y 1)])
-             (blocked? [(+ piece-pos-x 3) (+ piece-pos-y 2)]
-                       [(+ piece-pos-x 2) piece-pos-y])
-             (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 3)]
-                       [(+ piece-pos-x 3) (+ piece-pos-y 2)])
-             (blocked? [piece-pos-x (+ piece-pos-y 1)]
-                       [(+ piece-pos-x 1) (+ piece-pos-y 3)])
-             (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 1)]
-                       [(+ piece-pos-x 1) (+ piece-pos-y 2)])
-             (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 1)]
-                       [(+ piece-pos-x 1) (+ piece-pos-y 1)])
-             (blocked? [(+ piece-pos-x 2) (+ piece-pos-y 2)]
-                       [(+ piece-pos-x 2) (+ piece-pos-y 1)])
-             (blocked? [(+ piece-pos-x 1) (+ piece-pos-y 2)]
-                       [(+ piece-pos-x 2) (+ piece-pos-y 2)]))))
+  (var blocked false)
+  (loop [row :in rot-info
+         i :range [0 (length row)]
+         :let [[x1 y1] (get row i)
+               [x2 y2] (if (not= i (dec (length row)))
+                         (get row (inc i))
+                         (get row 0))]]
+    (when (blocked? [(+ piece-pos-x x2) (+ piece-pos-y y2)]
+                    [(+ piece-pos-x x1) (+ piece-pos-y y1)])
+      (set blocked true)
+      (break)))
+  (put state :result (not blocked))
   #
   state)
 
@@ -61,10 +45,8 @@
               (get-in state [:piece ;(get positions (inc i))])))
     (put-in state [:piece ;(last positions)] aux))
   #
-  (left-rotate-units [[0 0] [3 0] [3 3] [0 3]])
-  (left-rotate-units [[1 0] [3 1] [2 3] [0 2]])
-  (left-rotate-units [[2 0] [3 2] [1 3] [0 1]])
-  (left-rotate-units [[1 1] [2 1] [2 2] [1 2]])
+  (each row rot-info
+    (left-rotate-units row))
   #
   state)
 
