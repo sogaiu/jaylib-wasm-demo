@@ -65,7 +65,7 @@
   (put state :line-to-delete false)
   # number of lines deleted so far
   (put state :lines 0)
-  (put state :detection false)
+  (put state :blocked-below false)
   (put state :gravity-move-counter 0)
   (put state :lateral-move-counter 0)
   (put state :turn-move-counter 0)

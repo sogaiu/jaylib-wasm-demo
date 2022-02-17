@@ -4,14 +4,14 @@
   [state]
   (def grid (state :grid))
   #
-  (if (state :detection)
+  (if (state :blocked-below)
     # stop the piece
     (loop [j :down-to [(- p/grid-y-size 2) 0]
            i :range [1 (dec p/grid-x-size)]
            :when (= :moving
                     (get-in grid [i j]))]
       (put-in grid [i j] :full)
-      (put state :detection false)
+      (put state :blocked-below false)
       (put state :piece-active false))
     # move the piece down
     (do
@@ -25,7 +25,7 @@
   #
   state)
 
-(defn check-detection!
+(defn check-blocked-below!
   [state]
   # check if there is even one spot below the current line that a piece
   # cannot be moved into (i.e. :full or :block)
@@ -38,7 +38,7 @@
                            (get-in grid [i (inc j)]))
                         (= :block
                            (get-in grid [i (inc j)]))))]
-    (put state :detection true))
+    (put state :blocked-below true))
   #
   state)
 

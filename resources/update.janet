@@ -89,7 +89,7 @@
     (+= (state :gravity-move-counter) p/gravity-speed))
   (when (>= (state :gravity-move-counter) p/gravity-speed)
     # falling
-    (f/check-detection! state)
+    (f/check-blocked-below! state)
     # collision?
     (f/resolve-falling-move! state)
     # any lines completed?
