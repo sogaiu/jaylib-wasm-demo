@@ -469,8 +469,8 @@
               (d :hours) (d :minutes) (d :seconds) (dyn :frame))))
   (setdyn :frame (inc (dyn :frame)))
   #
-  (when (state :bgm)
-    (j/update-music-stream (state :bgm)))
+  (when-let [bgm (state :bgm)]
+    (j/update-music-stream bgm))
   #
   (-> state
       update-game!
@@ -490,11 +490,10 @@
 (defn common-startup
   []
   (var state @{})
-  # now that a loop is not being done in janet, this needs to
-  # happen
-  (j/init-window p/screen-width p/screen-height "Jaylib Demo")
   #
   (s/init! state)
+  #
+  (j/init-window p/screen-width p/screen-height "Jaylib Demo")
   #
   (j/init-audio-device)
   (put state :bgm (j/load-music-stream "resources/theme.ogg"))
