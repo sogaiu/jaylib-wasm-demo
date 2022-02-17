@@ -77,11 +77,11 @@
          :let [[x1 y1] (get row i)
                [x2 y2] (if (not= i (dec (length row)))
                          (get row (inc i))
-                         (get row 0))]]
-    (when (blocked? [(+ piece-pos-x x2) (+ piece-pos-y y2)]
-                    [(+ piece-pos-x x1) (+ piece-pos-y y1)])
-      (set blocked true)
-      (break)))
+                         (get row 0))]
+         :when (blocked? [(+ piece-pos-x x2) (+ piece-pos-y y2)]
+                         [(+ piece-pos-x x1) (+ piece-pos-y y1)])]
+    (set blocked true)
+    (break))
   (put state :result (not blocked))
   #
   state)
