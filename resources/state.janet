@@ -74,6 +74,6 @@
   #
   (put state :bgm nil)
   (put state :bgm-volume 0.5)
-  # XXX: hack for retrieving result of function invocation
+  # XXX: hack for storing and retrieving result of function invocation
   (put state :result nil)
   state)
