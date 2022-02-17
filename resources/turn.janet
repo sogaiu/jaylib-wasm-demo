@@ -1,6 +1,58 @@
 (import jaylib :as j)
 (import ./params :as p)
 
+# in rot-info below, each row can be thought of as representing a
+# counterclockwise rotation of n items that are components (units) of
+# a piece, e.g. the row:
+#
+#   [[0 0] [3 0] [3 3] [0 3]]
+#
+# can indicate:
+#
+#   * move the unit at 3,0 to 0,0
+#   * move the unit at 3,3 to 3,0
+#   * move the unit at 0,3 to 3,3
+#   * move the unit at 0,0 to 0,3
+#
+#      0     1     2     3
+#   +-----+-----+-----+-----+
+#   |     |     |     |     |
+# 0 |  <- | --- | --- | -^  |
+#   |  |  |     |     |  |  |
+#   +-----------------------+
+#   |  |  |     |     |  |  |
+# 1 |  |  |     |     |  |  |
+#   |  |  |     |     |  |  |
+#   +-----------------------+
+#   |  |  |     |     |  |  |
+# 2 |  |  |     |     |  |  |
+#   |  |  |     |     |  |  |
+#   +-----------------------+
+#   |  |  |     |     |  |  |
+# 3 |  V- | --- | --- | ->  |
+#   |     |     |     |     |
+#   +-----+-----+-----+-----+
+#
+# this is done in rotate-ccw! below.
+#
+# the info in all of the rows can also be used to check whether a
+# counterclockwise rotation is possible (i.e. not blocked),
+# e.g. looking at:
+#
+#   [[0 0] [3 0] [3 3] [0 3]]
+#
+# and checking that:
+#
+#   * the unit at 3,0 can be moved to 0,0
+#   * the unit at 3,3 can be moved to 3,0
+#   * the unit at 0,3 can be moved to 3,3
+#   * the unit at 0,0 can be moved to 0,3
+#
+# it indicates that rotation might be possible.  to fully answer
+# the question, the other remaining rows would need to be checked
+# in a similar manner.
+#
+# this is done in can-rotate? below.
 (def rot-info
   [[[0 0] [3 0] [3 3] [0 3]]
    [[1 0] [3 1] [2 3] [0 2]]
