@@ -114,10 +114,12 @@
 
 (defn get-random-piece!
   [state]
+  (def future-piece
+    (get state :future-piece))
   # empty out future-piece
   (loop [i :range [0 p/piece-dim]
          j :range [0 p/piece-dim]]
-    (put-in state [:future-piece i j] :empty))
+    (put-in future-piece [i j] :empty))
   #
   (def pieces
     [[[1 1] [2 1] [1 2] [2 2]]   # O
@@ -132,7 +134,7 @@
   (loop [a-unit :in (get pieces
                          (math/rng-int an-rng
                                        (+ (dec (length pieces)) 1)))]
-    (put-in state [:future-piece ;a-unit] :moving))
+    (put-in future-piece a-unit :moving))
   #
   state)
 
