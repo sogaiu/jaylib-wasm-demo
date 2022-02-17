@@ -7,6 +7,7 @@
 (import jaylib :as j)
 (import ./params :as p)
 (import ./draw :as d)
+(import ./state :as s)
 
 ###########################################################################
 
@@ -17,88 +18,6 @@
   )
 
 ###########################################################################
-
-(var state @{})
-
-###########################################################################
-
-(defn init-grid
-  []
-  (def a-grid @[])
-  (loop [i :range [0 p/grid-x-size]
-         :before (put a-grid i (array/new p/grid-y-size))
-         j :range [0 p/grid-y-size]]
-    (if (or (= i 0)
-            (= i (dec p/grid-x-size))
-            (= j (dec p/grid-y-size)))
-      # pre-fill left, right, and bottom edges of the grid
-      (put-in a-grid [i j] :block)
-      # all other spots are :empty
-      (put-in a-grid [i j] :empty)))
-  a-grid)
-
-(defn init-piece
-  []
-  (def a-piece @[])
-  # mark all spots in a-piece :empty
-  (loop [i :range [0 p/piece-dim]
-         :before (put a-piece i (array/new p/piece-dim))
-         j :range [0 p/grid-x-size]]
-    (put-in a-piece [i j] :empty))
-  a-piece)
-
-(defn init-game!
-  [state]
-  # x-coordinate of top-left of "piece grid"
-  #
-  # "piece grid" is a piece-dim x piece-dim square of spots within the
-  # game grid.  the spots within the "piece grid" that represent the
-  # piece have the value :moving, while the other spots within the
-  # "piece grid" that are not occupied by the piece have the value
-  # :empty.
-  (put state :piece-pos-x 0)
-  # y-coordinate of top-left of "piece grid"
-  (put state :piece-pos-y 0)
-  # 2-d array with dimensions grid-x-size x grid-y-size
-  #
-  # possibly values include:
-  #
-  # :empty  - space unoccupied
-  # :full   - occupied (by what was part of past piece)
-  # :moving - occupied by part of in-motion piece
-  # :block  - pre-filled space - left, right, or bottom edge
-  # :fading - about to be deleted / cleared
-  (put state :grid (init-grid))
-  # 2-d array with dimensions piece-dim x piece-dim
-  #
-  # possible values include:
-  #
-  # :empty  - spot is empty
-  # :moving - spot is part of piece
-  (put state :piece @[])
-  # same structure and content as piece
-  (put state :future-piece (init-piece))
-  (put state :game-over false)
-  (put state :pause false)
-  (put state :begin-play true)
-  (put state :piece-active false)
-  (put state :fading-color :gray)
-  # whether any lines need to be deleted
-  (put state :line-to-delete false)
-  # number of lines deleted so far
-  (put state :lines 0)
-  (put state :detection false)
-  (put state :gravity-move-counter 0)
-  (put state :lateral-move-counter 0)
-  (put state :turn-move-counter 0)
-  (put state :fast-fall-move-counter 0)
-  (put state :fade-line-counter 0)
-  #
-  (put state :bgm nil)
-  (put state :bgm-volume 0.5)
-  # XXX: hack for retrieving result of function invocation
-  (put state :result nil)
-  state)
 
 (defn get-random-piece!
   [state]
@@ -517,7 +436,7 @@
   [state]
   (when (state :game-over)
     (when (j/key-pressed? :enter)
-      (init-game! state))
+      (s/init! state))
     (break state))
   #
   (when (j/key-pressed? :m)
@@ -570,24 +489,22 @@
 
 (defn common-startup
   []
+  (var state @{})
   # now that a loop is not being done in janet, this needs to
   # happen
   (j/init-window p/screen-width p/screen-height "Jaylib Demo")
-
-  (init-game! state)
-
+  #
+  (s/init! state)
+  #
   (j/init-audio-device)
   (put state :bgm (j/load-music-stream "resources/theme.ogg"))
   (j/play-music-stream (state :bgm))
   (j/set-music-volume (state :bgm) (state :bgm-volume))
-
   # to facilitate calling from main.c
   (set update-draw-frame
        |(update-draw-frame! state))
-
   # XXX
   (setdyn :frame 0)
-
   # this fiber is used repeatedly by the c code, partly to maintain
   # dynamic variables (as those are per-fiber), but also because reusing
   # a fiber with a function is likely faster than parsing and compiling
@@ -605,6 +522,7 @@
 # XXX: original code
 '(defn main
   [& args]
+  (var state @{})
   #
   (j/set-config-flags :msaa-4x-hint)
   (j/init-window p/screen-width p/screen-height "Jaylib Demo")
@@ -612,7 +530,7 @@
   #
   (j/set-exit-key 0)
   #
-  (init-game! state)
+  (s/init! state)
   #
   (while (not (j/window-should-close))
     (update-draw-frame! state))
