@@ -15,7 +15,7 @@
   # XXX
   (when (zero? (mod (dyn :frame) 1000))
     (let [d (os/date (os/time) true)]
-      (printf "%02d:%02d:%02d - %p"
+      (printf "%02d:%02d:%02d - %p frames"
               (d :hours) (d :minutes) (d :seconds) (dyn :frame))))
   (setdyn :frame (inc (dyn :frame)))
   #
