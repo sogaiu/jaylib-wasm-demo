@@ -88,14 +88,15 @@
 
 (defn rotate-ccw!
   [state]
+  (def piece (state :piece))
   (defn left-rotate-units
     [positions]
     (var aux
-      (get-in state [:piece ;(first positions)]))
+      (get-in piece (first positions)))
     (loop [i :range [0 (dec (length positions))]]
-      (put-in state [:piece ;(get positions i)]
-              (get-in state [:piece ;(get positions (inc i))])))
-    (put-in state [:piece ;(last positions)] aux))
+      (put-in piece (get positions i)
+              (get-in piece (get positions (inc i)))))
+    (put-in piece (last positions) aux))
   #
   (each row rot-info
     (left-rotate-units row))
