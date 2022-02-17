@@ -22,54 +22,21 @@
 
 ###########################################################################
 
-(defn get-random-piece!
+(defn toggle-mute!
   [state]
-  # empty out future-piece
-  (loop [i :range [0 p/piece-dim]
-         j :range [0 p/piece-dim]]
-    (put-in state [:future-piece i j] :empty))
-  #
-  (def pieces
-    [[[1 1] [2 1] [1 2] [2 2]]   # O
-     [[1 0] [1 1] [1 2] [2 2]]   # L
-     [[1 2] [2 0] [2 1] [2 2]]   # J
-     [[0 1] [1 1] [2 1] [3 1]]   # I
-     [[1 0] [1 1] [1 2] [2 1]]   # T
-     [[1 1] [2 1] [2 2] [3 2]]   # Z
-     [[1 2] [2 2] [2 1] [3 1]]]) # S
-  # choose a random piece
-  # XXX: docs say math/rng-int will return up through max, but only max - 1?
-  (loop [a-unit :in (get pieces
-                         (math/rng-int an-rng
-                                       (+ (dec (length pieces)) 1)))]
-    (put-in state [:future-piece ;a-unit] :moving))
+  (if (zero? (state :bgm-volume))
+    (put state :bgm-volume 0.5)
+    (put state :bgm-volume 0))
+  (j/set-music-volume (state :bgm) (state :bgm-volume))
   #
   state)
 
-(defn create-piece!
+(defn toggle-pause!
   [state]
-  (put state :piece-pos-x
-       (math/floor (/ (- p/grid-x-size 4)
-                      2)))
-  (put state :piece-pos-y 0)
-  # create extra piece this one time
-  (when (state :begin-play)
-    (get-random-piece! state)
-    (put state :begin-play false))
-  # copy newly obtained future-piece to piece
-  (loop [i :range [0 p/piece-dim]
-         j :range [0 p/piece-dim]]
-    (put-in state [:piece i j]
-            (get-in state [:future-piece i j])))
-  # get another future piece
-  (get-random-piece! state)
-  # put the piece in the grid
-  (def piece-pos-x (state :piece-pos-x))
-  (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
-         j :range [0 p/piece-dim]
-         :when (= :moving
-                  (get-in state [:piece (- i piece-pos-x) j]))]
-    (put-in state [:grid i j] :moving))
+  (put state :pause (not (state :pause)))
+  (if (state :pause)
+    (j/pause-music-stream (state :bgm))
+    (j/resume-music-stream (state :bgm)))
   #
   state)
 
@@ -102,24 +69,6 @@
               (put-in [i2 j2] :empty))))))
   #
   (put state :result n-lines)
-  #
-  state)
-
-(defn toggle-mute!
-  [state]
-  (if (zero? (state :bgm-volume))
-    (put state :bgm-volume 0.5)
-    (put state :bgm-volume 0))
-  (j/set-music-volume (state :bgm) (state :bgm-volume))
-  #
-  state)
-
-(defn toggle-pause!
-  [state]
-  (put state :pause (not (state :pause)))
-  (if (state :pause)
-    (j/pause-music-stream (state :bgm))
-    (j/resume-music-stream (state :bgm)))
   #
   state)
 
@@ -171,6 +120,57 @@
   (when (>= (state :turn-move-counter) p/turning-speed)
     (when ((t/resolve-turn-move! state) :result)
       (put state :turn-move-counter 0)))
+  #
+  state)
+
+(defn get-random-piece!
+  [state]
+  # empty out future-piece
+  (loop [i :range [0 p/piece-dim]
+         j :range [0 p/piece-dim]]
+    (put-in state [:future-piece i j] :empty))
+  #
+  (def pieces
+    [[[1 1] [2 1] [1 2] [2 2]]   # O
+     [[1 0] [1 1] [1 2] [2 2]]   # L
+     [[1 2] [2 0] [2 1] [2 2]]   # J
+     [[0 1] [1 1] [2 1] [3 1]]   # I
+     [[1 0] [1 1] [1 2] [2 1]]   # T
+     [[1 1] [2 1] [2 2] [3 2]]   # Z
+     [[1 2] [2 2] [2 1] [3 1]]]) # S
+  # choose a random piece
+  # XXX: docs say math/rng-int will return up through max, but only max - 1?
+  (loop [a-unit :in (get pieces
+                         (math/rng-int an-rng
+                                       (+ (dec (length pieces)) 1)))]
+    (put-in state [:future-piece ;a-unit] :moving))
+  #
+  state)
+
+(defn create-piece!
+  [state]
+  (put state :piece-pos-x
+       (math/floor (/ (- p/grid-x-size 4)
+                      2)))
+  (put state :piece-pos-y 0)
+  # create extra piece this one time
+  (when (state :begin-play)
+    (get-random-piece! state)
+    (put state :begin-play false))
+  # copy newly obtained future-piece to piece
+  (loop [i :range [0 p/piece-dim]
+         j :range [0 p/piece-dim]]
+    (put-in state [:piece i j]
+            (get-in state [:future-piece i j])))
+  # get another future piece
+  (get-random-piece! state)
+  # put the piece in the grid
+  (def piece-pos-x (state :piece-pos-x))
+  (loop [i :range [piece-pos-x (+ piece-pos-x 4)]
+         j :range [0 p/piece-dim]
+         :when (= :moving
+                  (get-in state [:piece (- i piece-pos-x) j]))]
+    (put-in state [:grid i j] :moving))
   #
   state)
 
