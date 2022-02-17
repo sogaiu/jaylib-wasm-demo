@@ -91,7 +91,7 @@
     (+= offset-y p/square-size))
   # label future piece box
   (j/draw-text "UPCOMING:"
-               offset-x (- offset-y 100)
+               offset-x (- offset-y (* p/piece-dim p/square-size) 30)
                10 :gray)
   # show how many lines completed so far
   (j/draw-text (string/format "LINES:      %04i" (state :lines))
