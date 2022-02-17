@@ -39,7 +39,7 @@
 
 (defn common-startup
   []
-  (var state @{})
+  (def state @{})
   #
   (s/init! state)
   #
