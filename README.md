@@ -53,13 +53,15 @@ The goal of this demo is to produce appropriate `.wasm`, `.js`, `.html`, and rel
 
 ## Notes
 
-The "game loop" currently relies on invoking `janet_pcall` to invoke
-Janet code.  At present, this means dynamic variables from previous
-invocations are not preserved as `janet_pcall` resets passed fibers
-(or creates completely new ones).  This is at least partly beacuse
-dynamic variables are associated with each fiber.
+The "game loop" currently relies on invoking a modified version of
+`janet_pcall` named `janet_pcall_keep_env` to invoke Janet code.
+`janet_pcall` resets passed fibers (or creates completely new ones)
+which implies that dynamic variables are not preserved between
+invocations because dynamic variables are associated with specific
+fibers.  If `janet_pcall_keep_env` is passed a non-NULL fiber, the
+associated environment (and hence dynamic variables) are reused.
 
-One alternative is to use `janet_continue`, which allows one to pass a
+An alternative is to use `janet_continue`, which allows one to pass a
 fiber which doesn't get reset.  Since the same fiber can be reused
 without resetting, dynamic variables can be preserved between
 invocations.  However, Emscripten then produces somewhat broken code [1]
@@ -72,8 +74,9 @@ this demo)...
 
 In summary, current advice is:
 
-* if audio is desired, use `janet_pcall` and don't use dynamic variables
-* if audio is unneeded, one can use `janet_continue` instead
+* if audio is desired, either use `janet_pcall` and don't use dynamic
+  variables, or use `janet_pcall_keep_env`.
+* if audio is unneeded, one can use `janet_continue` instead.
 
 [1] Currently, it's not clear why `ASYNCIFY` is necessary.  bakpakin's
     `webrepl.c` for janet-lang.org's web REPL also uses
