@@ -33,6 +33,8 @@ JanetSignal janet_pcall_keep_env(
         JanetTable* env = (*f)->env;
         fiber = janet_fiber_reset(*f, fun, argc, argv);
         fiber->env = env;
+    } else {
+        fiber = janet_fiber(fun, 64, argc, argv);
     }
     if (f) *f = fiber;
     if (!fiber) {
