@@ -84,20 +84,58 @@
   (def piece-pos-x (state :piece-pos-x))
   (def piece-pos-y (state :piece-pos-y))
   #
-  (var blocked false)
-  (loop [row :in (rot-info p/piece-dim)
-         i :range [0 (length row)]
-         :let [[x1 y1] (get row i)
-               [x2 y2] (if (not= i (dec (length row)))
-                         (get row (inc i))
-                         (get row 0))]
-         :when (blocked? [(+ piece-pos-x x2) (+ piece-pos-y y2)]
-                         [(+ piece-pos-x x1) (+ piece-pos-y y1)])]
-    (set blocked true)
-    (break))
+  (def blocked
+    (label result
+      (loop [row :in (rot-info p/piece-dim)
+             i :range [0 (length row)]
+             :let [[x1 y1] (get row i)
+                   [x2 y2] (if (not= i (dec (length row)))
+                             (get row (inc i))
+                             (get row 0))]
+             :when (blocked? [(+ piece-pos-x x2) (+ piece-pos-y y2)]
+                             [(+ piece-pos-x x1) (+ piece-pos-y y1)])]
+        (return result true))
+      (return result false)))
+  #
   (put state :result (not blocked))
   #
   state)
+
+(comment
+
+  (import ./utils :as u)
+
+  (let [t-grid [[:block :empty :empty  :empty  :empty :block]
+                [:block :empty :moving :empty  :empty :block]
+                [:block :empty :moving :moving :empty :block]
+                [:block :empty :moving :empty  :empty :block]
+                [:block :block :block  :block  :block :block]]
+        grid (u/transpose t-grid)
+        state @{:grid grid
+                :grid-x-size (length grid)
+                :grid-y-size (length (get grid 0))
+                :piece-pos-x 1
+                :piece-pos-y 1}]
+    ((can-rotate? state) :result))
+  # =>
+  true
+
+  (let [t-grid [[:block :empty :empty  :empty  :empty :block]
+                [:block :full  :moving :empty  :empty :block]
+                [:block :full  :moving :moving :empty :block]
+                [:block :full  :moving :empty  :empty :block]
+                [:block :block :block  :block  :block :block]]
+        grid (u/transpose t-grid)
+        state @{:grid grid
+                :grid-x-size (length grid)
+                :grid-y-size (length (get grid 0))
+                :piece-pos-x 1
+                :piece-pos-y 1}]
+    ((can-rotate? state) :result))
+  # =>
+  false
+
+  )
 
 (defn rotate-ccw!
   [state]
@@ -115,6 +153,25 @@
     (left-rotate-units row))
   #
   state)
+
+(comment
+
+  (import ./utils :as u)
+
+  (let [t-piece [[:empty :empty  :empty  :empty]
+                 [:empty :moving :empty  :empty]
+                 [:empty :moving :moving :empty]
+                 [:empty :moving :empty  :empty]]
+        piece (u/transpose t-piece)
+        state @{:piece piece}]
+    (u/transpose ((rotate-ccw! state) :piece)))
+  # =>
+  @[@[:empty :empty  :empty  :empty]
+    @[:empty :empty  :moving :empty]
+    @[:empty :moving :moving :moving]
+    @[:empty :empty  :empty  :empty]]
+
+  )
 
 (defn resolve-turn-move!
   [state]
