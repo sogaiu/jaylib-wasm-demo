@@ -18,7 +18,7 @@ The goal of this demo is to produce appropriate `.wasm`, `.js`, `.html`, and rel
 ## Prerequisites
 
 * Emscripten 3.1.3 (other versions might work)
-* Usual build tools
+* Usual build tools (e.g. to get Emscripten working on Windows Python is needed)
 * Janet
 
 ## Steps
@@ -85,6 +85,12 @@ In summary, current advice is:
     would be triggering `janet_continue` via
     `emscripten_set_main_loop`, while `webrepl.c`'s `janet_continue`
     is user-triggered.
+
+## Issues
+
+* On Windows if `janet build-windows.janet` fails in the final
+  compilation step, it may be worth trying [this
+  workaround](https://github.com/emscripten-core/emscripten/issues/10551#issuecomment-608566377).
 
 ## Thanks
 
