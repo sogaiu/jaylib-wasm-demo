@@ -71,7 +71,7 @@
     (try
       (os/cd "jaylib/raylib/src")
       ([e]
-        (eprintf "<<failed to cd to janet directory>>")
+        (eprintf "<<failed to cd to jaylib/raylib/src directory>>")
         (os/exit 1)))
     (def commands
       [["emcc.bat"
