@@ -76,7 +76,8 @@ int main(int argc, char** argv) {
 
   int status =
     janet_dostring(core_env,
-                   "(import ./resources/game :prefix \"\")\n"
+                   "(setdyn :syspath \"./resources\")\n"
+                   "(import game :prefix \"\")\n"
                    "(common-startup)\n"
                    // want this in c anyway, so "returning" this
                    "main-fiber",

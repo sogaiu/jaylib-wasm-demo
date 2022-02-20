@@ -9,7 +9,7 @@ if [[ -z "${JAYLIB_WASM_DEMO_SKIP_DEPS}" ]]; then
     echo "[Preparing janet amalgamated bits]..."
     cd janet && \
         make clean && \
-        PREFIX=${PRELOAD_DIR} make && \
+        make && \
         cd ..
 
     echo "[Preparing libraylib.a]..."
@@ -21,7 +21,7 @@ if [[ -z "${JAYLIB_WASM_DEMO_SKIP_DEPS}" ]]; then
     echo "[Preparing jaylib.janet shim]..."
     mkdir -p ${PRELOAD_DIR}/lib/janet && \
         janet make-jaylib-janet-shim.janet \
-              jaylib/src ${PRELOAD_DIR}/lib/janet/jaylib.janet
+              jaylib/src ${PRELOAD_DIR}/jaylib.janet
 fi
 
 [ -e janet/build/c/janet.c ] || \
