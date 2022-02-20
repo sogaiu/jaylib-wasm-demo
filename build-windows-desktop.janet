@@ -4,23 +4,6 @@
 
 ###########################################################################
 
-(defn customize-build-script
-  [src]
-  (def result @[])
-  #
-  (each line (string/split "\n" src)
-    (if (string/has-prefix? `build\janet_boot .` line)
-      (array/push result
-                  (string `build\janet_boot . `
-                          # this is what is being added
-                          `JANET_PATH ` preload-dir `/lib/janet `
-                          `> build\c\janet.c`))
-      (array/push result
-                  line)))
-  (string/join result "\n"))
-
-###########################################################################
-
 (def start (os/clock))
 
 (prinf "\n[ensuring existence of build directory: %p]..." build-dir)
@@ -42,12 +25,8 @@
     ([e]
       (eprintf "<<problem with cleaning for janet>>")
       (os/exit 1)))
-  # create and execute custom build script
-  (def build-file-src (slurp "build_win.bat"))
-  (def custom-build-file-path "build_win_custom.bat")
-  (spit custom-build-file-path (customize-build-script build-file-src))
   (try
-    (os/execute [custom-build-file-path] :px)
+    (os/execute ["build_win.bat"] :px)
     ([e]
       (eprintf "<<problem building janet>>")
       (os/exit 1)))
@@ -182,13 +161,11 @@
     (os/exit 1)))
 
 (printf "\n[preparing jaylib.janet shim]...")
-(os/mkdir (string preload-dir "/lib"))
-(os/mkdir (string preload-dir "/lib/janet"))
 (try
   (os/execute ["janet"
                "make-jaylib-janet-shim.janet"
                "jaylib/src"
-               (string preload-dir "/lib/janet/jaylib.janet")] :px)
+               (string preload-dir "/jaylib.janet")] :px)
   ([e]
     (eprintf "<<problem creating jaylib.janet shim>>")
     (os/exit 1)))
