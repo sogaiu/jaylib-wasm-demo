@@ -27,8 +27,8 @@ fi
 [ -e janet/build/c/janet.c ] || \
     (echo "janet/build/c/janet.c not found, please build" && exit 1)
 
-[ -e jaylib/raylib/libraylib.a ] || \
-    (echo "jaylib/raylib/libraylib.a not found, please build" && exit 1)
+[ -e jaylib/raylib/src/libraylib.a ] || \
+    (echo "jaylib/raylib/src/libraylib.a not found, please build" && exit 1)
 
 echo "[Compiling output]..."
 gcc \
@@ -37,7 +37,7 @@ gcc \
     -o main \
     main.c \
     janet/build/c/janet.c \
-    jaylib/raylib/libraylib.a \
+    jaylib/raylib/src/libraylib.a \
     -Ijanet/build \
     -Ijaylib/src \
     -Ijaylib/raylib/src \

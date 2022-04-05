@@ -58,7 +58,8 @@
         (os/exit 1)))
     (try
       (os/execute ["make"
-                   "CFLAGS=-gsource-map"
+                   # XXX: causing emcc to fail at last step?
+                   #"CFLAGS=-gsource-map"
                    "PLATFORM=PLATFORM_WEB" "-B" "-e"] :px)
       ([e]
         (eprintf "<<problem building libjaylib.a>>")
