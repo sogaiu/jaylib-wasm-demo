@@ -19,7 +19,7 @@ if [[ -z "${JAYLIB_WASM_DEMO_SKIP_DEPS}" ]]; then
         cd ../../..
 
     echo "[Preparing jaylib.janet shim]..."
-    mkdir -p ${PRELOAD_DIR}/lib/janet && \
+    mkdir -p ${PRELOAD_DIR} && \
         janet make-jaylib-janet-shim.janet \
               jaylib/src ${PRELOAD_DIR}/jaylib.janet
 fi
