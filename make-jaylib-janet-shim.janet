@@ -4,7 +4,7 @@
 
 # this code "scrapes" .h files from jaylib and then creates a file
 # named `jaylib.janet`.  by placing this file in an appropriate
-# location (e.g. resources/lib/janet/jaylib.janet) for bundling by
+# location (e.g. resources/jaylib.janet) for bundling by
 # emcc, use of `(import jaylib)` or `(use jaylib)` or similar in one's
 # janet code should (continue to) work in the context of wasm /
 # emscripten.  note that use of this method is likely to add a bit of
@@ -12,10 +12,10 @@
 
 # sample invocation:
 #
-#   janet make-jaylib-janet-shim.janet jaylib/src resources/lib/janet/jaylib.janet
+#   janet make-jaylib-janet-shim.janet jaylib/src resources/jaylib.janet
 #
 # `jaylib/src` is an example of where jaylib's .h files live
-# `resources/lib/janet/jaylib.janet` is an example output file destination
+# `resources/jaylib.janet` is an example output file destination
 
 (defn main
   [& args]
@@ -27,7 +27,7 @@
       filepath))
   #
   (default dir-root "jaylib/src")
-  (default shim-file-path "resources/lib/janet/jaylib.janet")
+  (default shim-file-path "resources/jaylib.janet")
   #
   (def shim-file-dir
     (if-let [rev-path (string/reverse shim-file-path)
