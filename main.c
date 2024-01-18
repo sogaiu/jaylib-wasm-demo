@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
                    "main-fiber",
                    "game.janet", &ret);
 
-  if (status == JANET_SIGNAL_ERROR) {
+  if (status != 0) {
     printf("error loading game\n");
     janet_deinit();
     game_fiber = NULL;
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
                    "update-draw-frame",
                    "JanetFunction", &ret);
 
-  if (status == JANET_SIGNAL_ERROR) {
+  if (status != 0) {
     printf("error getting update-draw-frame\n");
     janet_deinit();
     game_fiber = NULL;
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
   status =
     janet_dostring(core_env, "(desktop)", "source", &ret);
 
-  if (status == JANET_SIGNAL_ERROR) {
+  if (status != 0) {
     printf("error during desktop-specific init\n");
     janet_deinit();
     game_fiber = NULL;
